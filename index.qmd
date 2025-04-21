@@ -1,0 +1,15 @@
+---
+title: "Lebin Sun"
+image: "files/profile_pic.jpg"
+about:
+  template: jolla
+  links:
+    - icon: envelope
+      href: les005@ucsd.edu
+    - icon: linkedin
+      href: https://www.linkedin.com/in/your_username
+---
+
+Welcome to my website!
+
+To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
