@@ -1,0 +1,157 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"A Replication of Karlan and List (2007)\"\n",
+        "author: \"Your Name\"\n",
+        "date: today\n",
+        "format: html\n",
+        "---\n",
+        "\n",
+        "## Introduction\n",
+        "\n",
+        "Dean Karlan at Yale and John List at the University of Chicago conducted a large-scale natural field experiment to understand how matching donations affect charitable giving. They randomly assigned over 50,000 previous donors to receive either a control letter or treatment letters with matching grants. The match ratios varied across treatments: $1:$1, $2:$1, and $3:$1. Additional variations included the suggested donation amount and maximum matching amount.\n",
+        "\n",
+        "This replication reproduces key descriptive and inferential statistics from their paper and examines whether their conclusions hold using the provided data.\n",
+        "\n",
+        "## Data\n",
+        "\n",
+        "### Description\n",
+        "\n",
+        "We use the dataset from the Karlan and List (2007) study, containing 50,083 observations. Key variables include:\n",
+        "- `gave`: Whether the recipient donated (1) or not (0)\n",
+        "- `amount`: Amount donated\n",
+        "- `treatment`: Indicator for being in the treatment group (matching grant letter)\n",
+        "- `ratio`: Match ratio level (1, 2, or 3)\n",
+        "- `control`: Indicator for the control group\n",
+        "- `redcty`: Whether the recipient is from a red county\n",
+        "- `bluecty`: Whether from a blue county\n",
+        "- `size`, `ask`: Threshold and suggested donation values\n",
+        "\n",
+        "Below is a summary of key columns:"
+      ],
+      "id": "2b0c74b7"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "summary_cols = ['gave', 'amount', 'treatment', 'ratio', 'control', 'redcty', 'bluecty']\n",
+        "df[summary_cols].describe(include='all')"
+      ],
+      "id": "f14665c6",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Analysis\n",
+        "\n",
+        "### Overall Effect of Treatment\n",
+        "\n",
+        "We begin by comparing the probability of giving between the control group and the treatment group."
+      ],
+      "id": "bc64341a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "group_means = df.groupby('treatment')['gave'].mean()\n",
+        "group_means.plot(kind='bar', title='Donation Rate by Treatment Group')\n",
+        "plt.ylabel('Proportion Donated')\n",
+        "plt.xlabel('Treatment Group (0 = Control, 1 = Match)')\n",
+        "plt.tight_layout()\n",
+        "plt.show()"
+      ],
+      "id": "7fda3436",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Effect of Match Ratio"
+      ],
+      "id": "e46c7d7b"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "summary  # Already computed in earlier steps"
+      ],
+      "id": "627717cc",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Red vs Blue County Effects"
+      ],
+      "id": "84abf230"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "red_blue_summary = df.groupby(['ratio', 'redcty']).agg(\n",
+        "    response_rate=('gave', 'mean'),\n",
+        "    average_amount=('amount', 'mean')\n",
+        ").reset_index()\n",
+        "tools.display_dataframe_to_user(name=\"Donation Response by Ratio and Red County\", dataframe=red_blue_summary)"
+      ],
+      "id": "903cb037",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Regression: Impact of Match Ratio"
+      ],
+      "id": "59cf8187"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import statsmodels.formula.api as smf\n",
+        "model = smf.logit(\"gave ~ C(ratio)\", data=df[df['treatment'] == 1]).fit()\n",
+        "model.summary()"
+      ],
+      "id": "ad6bb359",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Conclusion\n",
+        "\n",
+        "We find that matching grants increase the likelihood of donations relative to a control letter. However, increasing the match ratio beyond 1:1 to 2:1 or 3:1 does not significantly further boost donations. Interestingly, donors from red counties were more responsive to the matching offers than those from blue counties. These results reaffirm the importance of using behavioral nudges like matching grants in fundraising but question the value of increasing the match ratio beyond 1:1."
+      ],
+      "id": "e4cf45e6"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "/Users/lele/Library/Python/3.12/share/jupyter/kernels/python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

@@ -19,5 +19,14 @@
   },
   "hw1_questions.qmd": {
     "hw1_questions.html": "be8e62dc"
+  },
+  "blog/index.qmd": {
+    "index.html": "c714d423"
+  },
+  "Resume/resume.qmd": {
+    "resume.html": "53f608f9"
+  },
+  "blog/hw1_questions.qmd": {
+    "hw1_questions.html": "b55ccfc3"
   }
 }
