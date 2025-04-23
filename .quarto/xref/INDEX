@@ -28,5 +28,14 @@
   },
   "blog/hw1_questions.qmd": {
     "hw1_questions.html": "b55ccfc3"
+  },
+  "projects/index.qmd": {
+    "index.html": "15f57346"
+  },
+  "resume/index.qmd": {
+    "index.html": "057b21bf"
+  },
+  "blogs.qmd": {
+    "blogs.html": "39a809f1"
   }
 }
