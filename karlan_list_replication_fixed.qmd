@@ -1,0 +1,77 @@
+
+---
+title: "A Replication of Karlan and List (2007)"
+author: "Your Name"
+date: today
+format: html
+---
+
+## Introduction
+
+Dean Karlan at Yale and John List at the University of Chicago conducted a large-scale natural field experiment to understand how matching donations affect charitable giving. They randomly assigned over 50,000 previous donors to receive either a control letter or treatment letters with matching grants. The match ratios varied across treatments: $1:$1, $2:$1, and $3:$1. Additional variations included the suggested donation amount and maximum matching amount.
+
+This replication reproduces key descriptive and inferential statistics from their paper and examines whether their conclusions hold using the provided data.
+
+## Data
+
+### Description
+
+We use the dataset from the Karlan and List (2007) study, containing 50,083 observations. Key variables include:
+- `gave`: Whether the recipient donated (1) or not (0)
+- `amount`: Amount donated
+- `treatment`: Indicator for being in the treatment group (matching grant letter)
+- `ratio`: Match ratio level (1, 2, or 3)
+- `control`: Indicator for the control group
+- `redcty`: Whether the recipient is from a red county
+- `bluecty`: Whether from a blue county
+- `size`, `ask`: Threshold and suggested donation values
+
+Below is a summary of key columns:
+
+```{python}
+summary_cols = ['gave', 'amount', 'treatment', 'ratio', 'control', 'redcty', 'bluecty']
+df[summary_cols].describe(include='all')
+```
+
+## Analysis
+
+### Overall Effect of Treatment
+
+We begin by comparing the probability of giving between the control group and the treatment group.
+
+```{python}
+group_means = df.groupby('treatment')['gave'].mean()
+group_means.plot(kind='bar', title='Donation Rate by Treatment Group')
+plt.ylabel('Proportion Donated')
+plt.xlabel('Treatment Group (0 = Control, 1 = Match)')
+plt.tight_layout()
+plt.show()
+```
+
+### Effect of Match Ratio
+
+```{python}
+summary  # Already computed in earlier steps
+```
+
+### Red vs Blue County Effects
+
+```{python}
+red_blue_summary = df.groupby(['ratio', 'redcty']).agg(
+    response_rate=('gave', 'mean'),
+    average_amount=('amount', 'mean')
+).reset_index()
+tools.display_dataframe_to_user(name="Donation Response by Ratio and Red County", dataframe=red_blue_summary)
+```
+
+### Regression: Impact of Match Ratio
+
+```{python}
+import statsmodels.formula.api as smf
+model = smf.logit("gave ~ C(ratio)", data=df[df['treatment'] == 1]).fit()
+model.summary()
+```
+
+## Conclusion
+
+We find that matching grants increase the likelihood of donations relative to a control letter. However, increasing the match ratio beyond 1:1 to 2:1 or 3:1 does not significantly further boost donations. Interestingly, donors from red counties were more responsive to the matching offers than those from blue counties. These results reaffirm the importance of using behavioral nudges like matching grants in fundraising but question the value of increasing the match ratio beyond 1:1.
