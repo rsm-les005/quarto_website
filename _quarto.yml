@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 website:
-  title: "quarto_website"
+  title: "Lebin's website"
   navbar:
     left:
       - href: index.qmd
@@ -12,7 +12,7 @@ website:
         text: Resume
       - href: projects.qmd
         text: Projects
-      - href: blog.qmd
+      - href: blogs.qmd
         text: Blogs
 
 format:

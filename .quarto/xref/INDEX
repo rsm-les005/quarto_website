@@ -37,5 +37,14 @@
   },
   "blogs.qmd": {
     "blogs.html": "39a809f1"
+  },
+  "blog/hw1/index.qmd": {
+    "index.html": "375ea847"
+  },
+  "blogs/hw1_questions.qmd": {
+    "hw1_questions.html": "5267d018"
+  },
+  "blogs/hw1/index.qmd": {
+    "index.html": "acdf3a83"
   }
 }

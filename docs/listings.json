@@ -16,6 +16,9 @@
   },
   {
     "listing": "/blogs.html",
-    "items": []
+    "items": [
+      "/blogs/hw1_questions.html",
+      "/blogs/hw1/index.html"
+    ]
   }
 ]
