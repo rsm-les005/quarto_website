@@ -12,7 +12,7 @@ website:
         text: Resume
       - href: projects.qmd
         text: Projects
-      - href: blogs.qmd
+      - href: blogs/hw1/index.qmd
         text: Blogs
 
 format:
