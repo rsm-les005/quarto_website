@@ -286,7 +286,7 @@ tests = {
 
 import pandas as pd
 ttest_results = pd.DataFrame([
-    [k, round(v.statistic, 4), round(v.pvalue, 4)]
+    [k, round(v[0], 4), round(v[1], 4)]
     for k, v in tests.items()
 ], columns=["Comparison", "t-statistic", "p-value"])
 
