@@ -23,7 +23,7 @@ format:
     css: styles.css
     code-fold: true
     code-tools: true
-    sode-summary: "Show code"
+    code-summary: "Show code"
     toc: true
 
 
