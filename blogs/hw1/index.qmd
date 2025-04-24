@@ -12,7 +12,7 @@ Dean Karlan at Yale and John List at the University of Chicago conducted a field
 
 This study investigate whether the presence and size of a matching grant—commonly used by nonprofits—significantly affects donor behavior. The matching grant acts as a potential price reduction for donating, which may alter individuals’ willingness to give. The experiment’s large sample and randomized design make it especially well-suited to test economic theories of altruism, incentives, and social signaling.
 
-This project seeks to replicate the core findings of Karlan and List (2007), using the original dataset provided by the authors. Through our replication, I aim to confirm their main results, including how matching grants affect both the likelihood of donating and the average amount donated. I also explore potential heterogeneity in treatment effects by political geography, as highlighted in the original paper.
+This project seeks to replicate the core findings of Karlan and List (2007), using the original dataset provided by the authors. Through the replication, I aim to confirm their main results, including how matching grants affect both the likelihood of donating and the average amount donated. I also explore potential heterogeneity in treatment effects by political geography, as highlighted in the original paper.
 
 ## Data
 
@@ -22,12 +22,13 @@ This dataset comes from a large-scale natural field experiment conducted by Karl
 
 Each observation in the dataset corresponds to a single individual donor. The dataset includes variables that capture:
 
-    - Treatment assignment, including whether the donor received a matching grant offer and the specific match ratio (1:1, 2:1, or 3:1).
-    - Suggested donation amounts, which were manipulated as part of the experimental design.
-    - Donation behavior, such as whether the person donated in response, and how much they gave.
+    - Treatment assignment including whether the donor received a matching grant offer and the specific match ratio (1:1, 2:1, or 3:1).
+    - Suggested donation amounts which were manipulated as part of the experimental design.
+    - Donation behavior such as whether the person donated in response, and how much they gave.
     - Demographic indicators and prior donation history (e.g., years since first gift, total number of past donations, gender).
-    - Geographic and political indicators, such as whether the donor lived in a “red” or “blue” state during the 2004 presidential election, and the level of activity of the organization in that state.
+    - Geographic and political indicators such as whether the donor lived in a “red” or “blue” state during the 2004 presidential election, and the level of activity of the organization in that state.
 
+The following Python code chunk loads the original dataset Dean Karlan used: 
 ```{python}
 import pandas as pd
 df = pd.read_stata("karlan_list_2007.dta")
@@ -37,11 +38,16 @@ df = pd.read_stata("karlan_list_2007.dta")
 This following table provides an overview of all variables in the dataset. It includes each variable’s name, its data type (e.g., numeric or categorical), and the number of missing values.
 
 ```{python}
+#| echo: false
 overview_table = pd.DataFrame({
     "Variable": df.columns,
     "Data Type": df.dtypes.values,
     "Missing Values": df.isnull().sum().values
 })
+```
+
+```{python}
+overview_table
 ```
 
 ### Variable Definitions
