@@ -21,6 +21,9 @@ format:
       - cosmo
       - brand
     css: styles.css
+    code-fold: true
+    code-tools: true
+    sode-summary: "Show code"
     toc: true
 
 
