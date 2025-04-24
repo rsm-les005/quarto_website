@@ -182,7 +182,6 @@ print(tabulate(reg_results, headers=headers, tablefmt="github"))
 This regression-based balance check complements the earlier t-tests by estimating the relationship between treatment assignment and baseline covariates. For each variable, we regress it on the `treatment` indicator and inspect the coefficient and p-value. All p-values are well above the 0.05 threshold, confirming that treatment status is not significantly associated with any pre-treatment variable. This is consistent with the design of a randomized controlled trial, further supporting the internal validity of the experiment. The results also match those from the manual t-tests, which is expected since the regression with a binary independent variable produces the same mean difference and inference as a t-test.
 
 
-
 ## Experimental Results
 
 ### Charitable Contribution Made
@@ -190,10 +189,75 @@ This regression-based balance check complements the earlier t-tests by estimatin
 First, I analyze whether matched donations lead to an increased response rate of making a donation. 
 
 _todo: make a barplot with two bars. Each bar is the proportion of people who donated. One bar for treatment and one bar for control._
+```{python}
+import matplotlib.pyplot as plt
+
+# Calculate proportion of donors in each group
+donation_rates = df.groupby("treatment")["gave"].mean().rename({0: "Control", 1: "Treatment"})
+
+# Plot bar chart
+donation_rates.plot(kind="bar", color=["gray", "orange"])
+plt.title("Proportion of People Who Donated")
+plt.ylabel("Donation Rate")
+plt.xticks(rotation=0)
+plt.ylim(0, 0.05)  # Adjust if needed for scale
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+```
+
+This plot displays the proportion of individuals who made a charitable contribution in the control and treatment groups. The donation rate is noticeably higher in the treatment group, indicating that the presence of a matching donation offer likely increased the likelihood of giving. This supports the hypothesis that matched donations can serve as an effective behavioral nudge in charitable fundraising.
 
 _todo: run a t-test between the treatment and control groups on the binary outcome of whether any charitable donation was made. Also run a bivariate linear regression that demonstrates the same finding. (It may help to confirm your calculations match Table 2a Panel A.) Report your statistical results and interpret them in the context of the experiment (e.g., if you found a difference with a small p-value or that was statistically significant at some threshold, what have you learned about human behavior? Use mostly English words, not numbers or stats, to explain your finding.)_
 
+```{python}
+from scipy.stats import ttest_ind
+
+# Split by treatment status
+treated = df[df['treatment'] == 1]
+control = df[df['treatment'] == 0]
+
+# Run two-sample t-test on 'gave' variable
+t_stat, p_val = ttest_ind(treated["gave"], control["gave"], equal_var=False)
+
+print(f"t-statistic: {t_stat:.4f}, p-value: {p_val:.4f}")
+```
+
+```{python}
+import statsmodels.formula.api as smf
+
+# Run regression
+model = smf.ols("gave ~ treatment", data=df).fit()
+
+# Format output
+from tabulate import tabulate
+table = [["Coef", model.params["treatment"]],
+         ["p-value", model.pvalues["treatment"]],
+         ["R-squared", model.rsquared]]
+print(tabulate(table, headers=["Metric", "Value"], tablefmt="github"))
+```
+
+Both the t-test and linear regression show a statistically significant difference in donation behavior between the treatment and control groups. Individuals who received a letter mentioning a matching grant were more likely to donate than those who received a standard letter. This finding replicates Table 2a Panel A of Karlan & List (2007), and supports the hypothesis that matched donations act as a strong psychological motivator. From a behavioral standpoint, it suggests that people are more inclined to give when their contributions feel amplified — they may view their gift as having a greater impact, which encourages them to take action. This simple intervention—adding a match offer—significantly influenced behavior even though the individuals in both groups received similar messages aside from that detail.
+
 _todo: run a probit regression where the outcome variable is whether any charitable donation was made and the explanatory variable is assignment to treatment or control. Confirm that your results replicate Table 3 column 1 in the paper._
+```{python}
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from tabulate import tabulate
+
+# Run probit regression
+probit_model = smf.probit("gave ~ treatment", data=df).fit(disp=0)
+
+# Clean output
+probit_summary = [
+    ["Coef", probit_model.params["treatment"]],
+    ["p-value", probit_model.pvalues["treatment"]],
+    ["Pseudo R-squared", probit_model.prsquared]
+]
+print(tabulate(probit_summary, headers=["Metric", "Value"], tablefmt="github"))
+```
+
+This probit regression estimates the effect of treatment assignment on the likelihood of making a donation, using a nonlinear model suitable for binary outcomes. The coefficient on the `treatment` variable is positive and statistically significant, indicating that individuals who received a matching gift message were more likely to donate. This result replicates the findings of Table 3, Column 1 in *Karlan & List (2007)*, providing further evidence that matching donations increase participation. While the probit coefficient itself isn’t directly interpretable as a percentage change, its sign and significance confirm the effect observed in the linear model and t-test. Together, these consistent results across models support the conclusion that match framing can significantly increase donor engagement in charitable campaigns.
 
 
 ### Differences between Match Rates
