@@ -165,18 +165,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a>
   <ul class="collapse">
   <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
-  <li><a href="#balance-test" id="toc-balance-test" class="nav-link" data-scroll-target="#balance-test">Balance Test</a></li>
-  </ul></li>
-  <li><a href="#experimental-results" id="toc-experimental-results" class="nav-link" data-scroll-target="#experimental-results">Experimental Results</a>
-  <ul class="collapse">
-  <li><a href="#charitable-contribution-made" id="toc-charitable-contribution-made" class="nav-link" data-scroll-target="#charitable-contribution-made">Charitable Contribution Made</a></li>
-  <li><a href="#differences-between-match-rates" id="toc-differences-between-match-rates" class="nav-link" data-scroll-target="#differences-between-match-rates">Differences between Match Rates</a></li>
-  <li><a href="#size-of-charitable-contribution" id="toc-size-of-charitable-contribution" class="nav-link" data-scroll-target="#size-of-charitable-contribution">Size of Charitable Contribution</a></li>
-  </ul></li>
-  <li><a href="#simulation-experiment" id="toc-simulation-experiment" class="nav-link" data-scroll-target="#simulation-experiment">Simulation Experiment</a>
-  <ul class="collapse">
-  <li><a href="#law-of-large-numbers" id="toc-law-of-large-numbers" class="nav-link" data-scroll-target="#law-of-large-numbers">Law of Large Numbers</a></li>
-  <li><a href="#central-limit-theorem" id="toc-central-limit-theorem" class="nav-link" data-scroll-target="#central-limit-theorem">Central Limit Theorem</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -219,12 +207,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>Dean Karlan at Yale and John List at the University of Chicago conducted a field experiment to test the effectiveness of different fundraising letters. They sent out 50,000 fundraising letters to potential donors, randomly assigning each letter to one of three treatments: a standard letter, a matching grant letter, or a challenge grant letter. They published the results of this experiment in the <em>American Economic Review</em> in 2007. The article and supporting data are available from the <a href="https://www.aeaweb.org/articles?id=10.1257/aer.97.5.1774">AEA website</a> and from Innovations for Poverty Action as part of <a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/27853&amp;version=4.2">Harvard’s Dataverse</a>.</p>
 <p>This study investigate whether the presence and size of a matching grant—commonly used by nonprofits—significantly affects donor behavior. The matching grant acts as a potential price reduction for donating, which may alter individuals’ willingness to give. The experiment’s large sample and randomized design make it especially well-suited to test economic theories of altruism, incentives, and social signaling.</p>
-<p>This project seeks to replicate the core findings of Karlan and List (2007), using the original dataset provided by the authors. Through our replication, we aim to confirm their main results, including how matching grants affect both the likelihood of donating and the average amount donated. We also explore potential heterogeneity in treatment effects by political geography, as highlighted in the original paper.</p>
+<p>This project seeks to replicate the core findings of Karlan and List (2007), using the original dataset provided by the authors. Through our replication, I aim to confirm their main results, including how matching grants affect both the likelihood of donating and the average amount donated. I also explore potential heterogeneity in treatment effects by political geography, as highlighted in the original paper.</p>
 </section>
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
 <section id="description" class="level3">
-<h3 class="anchored" data-anchor-id="description">Description</h3>
+<h3 class="anchored">Description</h3>
 <p>This dataset comes from a large-scale natural field experiment conducted by Karlan and List (2007) to study the impact of different fundraising strategies on charitable donations. It contains data from over 50,000 past donors to a U.S.-based nonprofit organization who were randomly assigned to receive one of several types of solicitation letters.</p>
 <p>Each observation in the dataset corresponds to a single individual donor. The dataset includes variables that capture:</p>
 <pre><code>- Treatment assignment, including whether the donor received a matching grant offer and the specific match ratio (1:1, 2:1, or 3:1).
@@ -232,16 +220,52 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 - Donation behavior, such as whether the person donated in response, and how much they gave.
 - Demographic indicators and prior donation history (e.g., years since first gift, total number of past donations, gender).
 - Geographic and political indicators, such as whether the donor lived in a “red” or “blue” state during the 2004 presidential election, and the level of activity of the organization in that state.</code></pre>
-<div id="a55d39cb" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load necessary libraries</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the dataset</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"karlan_list_2007.dta"</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Preview the dataset</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
+<div class="callout callout-style-simple callout-note no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<div id="cc918ff8" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"karlan_list_2007.dta"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Data Overview
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>This following table provides an overview of all variables in the dataset. It includes each variable’s name, its data type (e.g., numeric or categorical), and the number of missing values.</p>
+<div id="58f04334" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>overview_table <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Variable"</span>: df.columns,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Data Type"</span>: df.dtypes.values,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Missing Values"</span>: df.isnull().<span class="bu">sum</span>().values</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Variable Definitions
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The summary statistics table presents descriptive metrics for all numeric variables, including count, mean, standard deviation, and range (min/max).</p>
+<div id="55b363b1" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df.describe().transpose().<span class="bu">round</span>(<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
 <div>
 
 
@@ -249,154 +273,548 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">treatment</th>
-<th data-quarto-table-cell-role="th">control</th>
-<th data-quarto-table-cell-role="th">ratio</th>
-<th data-quarto-table-cell-role="th">ratio2</th>
-<th data-quarto-table-cell-role="th">ratio3</th>
-<th data-quarto-table-cell-role="th">size</th>
-<th data-quarto-table-cell-role="th">size25</th>
-<th data-quarto-table-cell-role="th">size50</th>
-<th data-quarto-table-cell-role="th">size100</th>
-<th data-quarto-table-cell-role="th">sizeno</th>
-<th data-quarto-table-cell-role="th">...</th>
-<th data-quarto-table-cell-role="th">redcty</th>
-<th data-quarto-table-cell-role="th">bluecty</th>
-<th data-quarto-table-cell-role="th">pwhite</th>
-<th data-quarto-table-cell-role="th">pblack</th>
-<th data-quarto-table-cell-role="th">page18_39</th>
-<th data-quarto-table-cell-role="th">ave_hh_sz</th>
-<th data-quarto-table-cell-role="th">median_hhincome</th>
-<th data-quarto-table-cell-role="th">powner</th>
-<th data-quarto-table-cell-role="th">psch_atlstba</th>
-<th data-quarto-table-cell-role="th">pop_propurban</th>
+<th data-quarto-table-cell-role="th">count</th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">std</th>
+<th data-quarto-table-cell-role="th">min</th>
+<th data-quarto-table-cell-role="th">25%</th>
+<th data-quarto-table-cell-role="th">50%</th>
+<th data-quarto-table-cell-role="th">75%</th>
+<th data-quarto-table-cell-role="th">max</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td>0</td>
-<td>1</td>
-<td>Control</td>
-<td>0</td>
-<td>0</td>
-<td>Control</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>...</td>
-<td>0.0</td>
-<td>1.0</td>
-<td>0.446493</td>
-<td>0.527769</td>
-<td>0.317591</td>
-<td>2.10</td>
-<td>28517.0</td>
-<td>0.499807</td>
-<td>0.324528</td>
-<td>1.0</td>
+<td data-quarto-table-cell-role="th">treatment</td>
+<td>50083.0</td>
+<td>0.67</td>
+<td>0.47</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
-<td>0</td>
-<td>1</td>
-<td>Control</td>
-<td>0</td>
-<td>0</td>
-<td>Control</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>...</td>
-<td>1.0</td>
-<td>0.0</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
+<td data-quarto-table-cell-role="th">control</td>
+<td>50083.0</td>
+<td>0.33</td>
+<td>0.47</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+<td>1.00</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
-<td>1</td>
-<td>0</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>$100,000</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
-<td>0</td>
-<td>...</td>
-<td>0.0</td>
-<td>1.0</td>
-<td>0.935706</td>
-<td>0.011948</td>
-<td>0.276128</td>
-<td>2.48</td>
-<td>51175.0</td>
-<td>0.721941</td>
-<td>0.192668</td>
-<td>1.0</td>
+<td data-quarto-table-cell-role="th">ratio2</td>
+<td>50083.0</td>
+<td>0.22</td>
+<td>0.42</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">3</td>
-<td>1</td>
-<td>0</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>Unstated</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
-<td>...</td>
-<td>1.0</td>
-<td>0.0</td>
-<td>0.888331</td>
-<td>0.010760</td>
-<td>0.279412</td>
-<td>2.65</td>
-<td>79269.0</td>
-<td>0.920431</td>
-<td>0.412142</td>
-<td>1.0</td>
+<td data-quarto-table-cell-role="th">ratio3</td>
+<td>50083.0</td>
+<td>0.22</td>
+<td>0.42</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">4</td>
-<td>1</td>
-<td>0</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>$50,000</td>
-<td>0</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>...</td>
-<td>0.0</td>
-<td>1.0</td>
-<td>0.759014</td>
-<td>0.127421</td>
-<td>0.442389</td>
-<td>1.85</td>
-<td>40908.0</td>
-<td>0.416072</td>
-<td>0.439965</td>
-<td>1.0</td>
+<td data-quarto-table-cell-role="th">size25</td>
+<td>50083.0</td>
+<td>0.17</td>
+<td>0.37</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">size50</td>
+<td>50083.0</td>
+<td>0.17</td>
+<td>0.37</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">size100</td>
+<td>50083.0</td>
+<td>0.17</td>
+<td>0.37</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">sizeno</td>
+<td>50083.0</td>
+<td>0.17</td>
+<td>0.37</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">askd1</td>
+<td>50083.0</td>
+<td>0.22</td>
+<td>0.42</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">askd2</td>
+<td>50083.0</td>
+<td>0.22</td>
+<td>0.42</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">askd3</td>
+<td>50083.0</td>
+<td>0.22</td>
+<td>0.42</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">ask1</td>
+<td>50083.0</td>
+<td>71.50</td>
+<td>101.73</td>
+<td>25.00</td>
+<td>35.00</td>
+<td>45.00</td>
+<td>65.00</td>
+<td>1500.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">ask2</td>
+<td>50083.0</td>
+<td>91.79</td>
+<td>127.25</td>
+<td>35.00</td>
+<td>45.00</td>
+<td>60.00</td>
+<td>85.00</td>
+<td>1875.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">ask3</td>
+<td>50083.0</td>
+<td>111.05</td>
+<td>151.67</td>
+<td>50.00</td>
+<td>55.00</td>
+<td>70.00</td>
+<td>100.00</td>
+<td>2250.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">amount</td>
+<td>50083.0</td>
+<td>0.92</td>
+<td>8.71</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>400.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">gave</td>
+<td>50083.0</td>
+<td>0.02</td>
+<td>0.14</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">amountchange</td>
+<td>50083.0</td>
+<td>-52.67</td>
+<td>1267.10</td>
+<td>-200412.12</td>
+<td>-50.00</td>
+<td>-30.00</td>
+<td>-25.00</td>
+<td>275.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">hpa</td>
+<td>50083.0</td>
+<td>59.38</td>
+<td>71.18</td>
+<td>0.00</td>
+<td>30.00</td>
+<td>45.00</td>
+<td>60.00</td>
+<td>1000.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">ltmedmra</td>
+<td>50083.0</td>
+<td>0.49</td>
+<td>0.50</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">freq</td>
+<td>50083.0</td>
+<td>8.04</td>
+<td>11.39</td>
+<td>0.00</td>
+<td>2.00</td>
+<td>4.00</td>
+<td>10.00</td>
+<td>218.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">years</td>
+<td>50082.0</td>
+<td>6.10</td>
+<td>5.50</td>
+<td>0.00</td>
+<td>2.00</td>
+<td>5.00</td>
+<td>9.00</td>
+<td>95.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">year5</td>
+<td>50083.0</td>
+<td>0.51</td>
+<td>0.50</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">mrm2</td>
+<td>50082.0</td>
+<td>13.01</td>
+<td>12.08</td>
+<td>0.00</td>
+<td>4.00</td>
+<td>8.00</td>
+<td>19.00</td>
+<td>168.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">dormant</td>
+<td>50083.0</td>
+<td>0.52</td>
+<td>0.50</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">female</td>
+<td>48972.0</td>
+<td>0.28</td>
+<td>0.45</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">couple</td>
+<td>48935.0</td>
+<td>0.09</td>
+<td>0.29</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">state50one</td>
+<td>50083.0</td>
+<td>0.00</td>
+<td>0.03</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">nonlit</td>
+<td>49631.0</td>
+<td>2.47</td>
+<td>1.96</td>
+<td>0.00</td>
+<td>1.00</td>
+<td>3.00</td>
+<td>4.00</td>
+<td>6.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">cases</td>
+<td>49631.0</td>
+<td>1.50</td>
+<td>1.16</td>
+<td>0.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>2.00</td>
+<td>4.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">statecnt</td>
+<td>50083.0</td>
+<td>6.00</td>
+<td>5.75</td>
+<td>0.00</td>
+<td>1.83</td>
+<td>3.54</td>
+<td>9.61</td>
+<td>17.37</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">stateresponse</td>
+<td>50083.0</td>
+<td>0.02</td>
+<td>0.01</td>
+<td>0.00</td>
+<td>0.02</td>
+<td>0.02</td>
+<td>0.02</td>
+<td>0.08</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">stateresponset</td>
+<td>50083.0</td>
+<td>0.02</td>
+<td>0.01</td>
+<td>0.00</td>
+<td>0.02</td>
+<td>0.02</td>
+<td>0.02</td>
+<td>0.11</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">stateresponsec</td>
+<td>50080.0</td>
+<td>0.02</td>
+<td>0.01</td>
+<td>0.00</td>
+<td>0.01</td>
+<td>0.02</td>
+<td>0.02</td>
+<td>0.05</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">stateresponsetminc</td>
+<td>50080.0</td>
+<td>0.00</td>
+<td>0.01</td>
+<td>-0.05</td>
+<td>-0.00</td>
+<td>0.00</td>
+<td>0.01</td>
+<td>0.11</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">perbush</td>
+<td>50048.0</td>
+<td>0.49</td>
+<td>0.08</td>
+<td>0.09</td>
+<td>0.44</td>
+<td>0.48</td>
+<td>0.53</td>
+<td>0.73</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">close25</td>
+<td>50048.0</td>
+<td>0.19</td>
+<td>0.39</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">red0</td>
+<td>50048.0</td>
+<td>0.40</td>
+<td>0.49</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">blue0</td>
+<td>50048.0</td>
+<td>0.60</td>
+<td>0.49</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">redcty</td>
+<td>49978.0</td>
+<td>0.51</td>
+<td>0.50</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">bluecty</td>
+<td>49978.0</td>
+<td>0.49</td>
+<td>0.50</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">pwhite</td>
+<td>48217.0</td>
+<td>0.82</td>
+<td>0.17</td>
+<td>0.01</td>
+<td>0.76</td>
+<td>0.87</td>
+<td>0.94</td>
+<td>1.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">pblack</td>
+<td>48047.0</td>
+<td>0.09</td>
+<td>0.14</td>
+<td>0.00</td>
+<td>0.01</td>
+<td>0.04</td>
+<td>0.09</td>
+<td>0.99</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">page18_39</td>
+<td>48217.0</td>
+<td>0.32</td>
+<td>0.10</td>
+<td>0.00</td>
+<td>0.26</td>
+<td>0.31</td>
+<td>0.37</td>
+<td>1.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">ave_hh_sz</td>
+<td>48221.0</td>
+<td>2.43</td>
+<td>0.38</td>
+<td>0.00</td>
+<td>2.21</td>
+<td>2.44</td>
+<td>2.66</td>
+<td>5.27</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">median_hhincome</td>
+<td>48209.0</td>
+<td>54815.70</td>
+<td>22027.32</td>
+<td>5000.00</td>
+<td>39181.00</td>
+<td>50673.00</td>
+<td>66005.00</td>
+<td>200001.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">powner</td>
+<td>48214.0</td>
+<td>0.67</td>
+<td>0.19</td>
+<td>0.00</td>
+<td>0.56</td>
+<td>0.71</td>
+<td>0.82</td>
+<td>1.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">psch_atlstba</td>
+<td>48215.0</td>
+<td>0.39</td>
+<td>0.19</td>
+<td>0.00</td>
+<td>0.24</td>
+<td>0.37</td>
+<td>0.53</td>
+<td>1.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">pop_propurban</td>
+<td>48217.0</td>
+<td>0.87</td>
+<td>0.26</td>
+<td>0.00</td>
+<td>0.88</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
 </tr>
 </tbody>
 </table>
 
-<p>5 rows × 51 columns</p>
 </div>
 </div>
 </div>
@@ -633,12 +1051,10 @@ Variable Definitions
 </div>
 </div>
 </div>
-</section>
 <section id="balance-test" class="level3">
 <h3 class="anchored" data-anchor-id="balance-test">Balance Test</h3>
 <p>As an ad hoc test of the randomization mechanism, I provide a series of tests that compare aspects of the treatment and control groups to assess whether they are statistically significantly different from one another.</p>
 <p><em>todo: test a few variables other than the key outcome variables (for example, test months since last donation) to see if the treatment and control groups are statistically significantly different at the 95% confidence level. Do each as a t-test and separately as a linear regression, and confirm you get the exact same results from both methods. When doing a t-test, use the formula in the class slides. When doing the linear regression, regress for example mrm2 on treatment and look at the estimated coefficient on the treatment variable. It might be helpful to compare parts of your analysis to Table 1 in the paper. Be sure to comment on your results (hint: why is Table 1 included in the paper).</em></p>
-</section>
 </section>
 <section id="experimental-results" class="level2">
 <h2 class="anchored" data-anchor-id="experimental-results">Experimental Results</h2>
@@ -678,6 +1094,17 @@ Variable Definitions
 <p><em>to do: Make 4 histograms like those on slide 44 from our first class at sample sizes 50, 200, 500, and 1000 and explain these plots to the reader. To do this for a sample size of e.g.&nbsp;50, take 50 draws from each of the control and treatment distributions, and calculate the average difference between those draws. Then repeat that process 999 more times so that you have 1000 averages. Plot the histogram of those averages. Comment on whether zero is in the “middle” of the distribution or whether it’s in the “tail.”</em></p>
 
 
+</section>
+</section>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </section>
 </section>
 

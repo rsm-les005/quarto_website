@@ -12,7 +12,7 @@ Dean Karlan at Yale and John List at the University of Chicago conducted a field
 
 This study investigate whether the presence and size of a matching grant—commonly used by nonprofits—significantly affects donor behavior. The matching grant acts as a potential price reduction for donating, which may alter individuals’ willingness to give. The experiment’s large sample and randomized design make it especially well-suited to test economic theories of altruism, incentives, and social signaling.
 
-This project seeks to replicate the core findings of Karlan and List (2007), using the original dataset provided by the authors. Through our replication, we aim to confirm their main results, including how matching grants affect both the likelihood of donating and the average amount donated. We also explore potential heterogeneity in treatment effects by political geography, as highlighted in the original paper.
+This project seeks to replicate the core findings of Karlan and List (2007), using the original dataset provided by the authors. Through our replication, I aim to confirm their main results, including how matching grants affect both the likelihood of donating and the average amount donated. I also explore potential heterogeneity in treatment effects by political geography, as highlighted in the original paper.
 
 ## Data
 
@@ -28,16 +28,32 @@ Each observation in the dataset corresponds to a single individual donor. The da
     - Demographic indicators and prior donation history (e.g., years since first gift, total number of past donations, gender).
     - Geographic and political indicators, such as whether the donor lived in a “red” or “blue” state during the 2004 presidential election, and the level of activity of the organization in that state.
 
+:::: {.callout-note collapse="true"}
 ```{python}
-# Load necessary libraries
 import pandas as pd
-
-# Load the dataset
 df = pd.read_stata("karlan_list_2007.dta")
-
-# Preview the dataset
-df.head()
 ```
+
+:::: {.callout-note collapse="true"}
+### Data Overview
+This following table provides an overview of all variables in the dataset. It includes each variable’s name, its data type (e.g., numeric or categorical), and the number of missing values.
+
+```{python}
+overview_table = pd.DataFrame({
+    "Variable": df.columns,
+    "Data Type": df.dtypes.values,
+    "Missing Values": df.isnull().sum().values
+})
+```
+
+:::: {.callout-note collapse="true"}
+### Variable Definitions
+The summary statistics table presents descriptive metrics for all numeric variables, including count, mean, standard deviation, and range (min/max).
+
+```{python}
+df.describe().transpose().round(2)
+```
+
 
 :::: {.callout-note collapse="true"}
 ### Variable Definitions
