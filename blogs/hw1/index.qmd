@@ -28,13 +28,11 @@ Each observation in the dataset corresponds to a single individual donor. The da
     - Demographic indicators and prior donation history (e.g., years since first gift, total number of past donations, gender).
     - Geographic and political indicators, such as whether the donor lived in a “red” or “blue” state during the 2004 presidential election, and the level of activity of the organization in that state.
 
-:::: {.callout-note collapse="true"}
 ```{python}
 import pandas as pd
 df = pd.read_stata("karlan_list_2007.dta")
 ```
 
-:::: {.callout-note collapse="true"}
 ### Data Overview
 This following table provides an overview of all variables in the dataset. It includes each variable’s name, its data type (e.g., numeric or categorical), and the number of missing values.
 
@@ -46,14 +44,12 @@ overview_table = pd.DataFrame({
 })
 ```
 
-:::: {.callout-note collapse="true"}
 ### Variable Definitions
-The summary statistics table presents descriptive metrics for all numeric variables, including count, mean, standard deviation, and range (min/max).
+The summary statistics table below presents descriptive metrics for all numeric variables in this dataset, including count, mean, standard deviation, and range (min/max).
 
 ```{python}
 df.describe().transpose().round(2)
 ```
-
 
 :::: {.callout-note collapse="true"}
 ### Variable Definitions
@@ -120,6 +116,71 @@ df.describe().transpose().round(2)
 As an ad hoc test of the randomization mechanism, I provide a series of tests that compare aspects of the treatment and control groups to assess whether they are statistically significantly different from one another.
 
 _todo: test a few variables other than the key outcome variables (for example, test months since last donation) to see if the treatment and control groups are statistically significantly different at the 95% confidence level. Do each as a t-test and separately as a linear regression, and confirm you get the exact same results from both methods. When doing a t-test, use the formula in the class slides. When doing the linear regression, regress for example mrm2 on treatment and look at the estimated coefficient on the treatment variable. It might be helpful to compare parts of your analysis to Table 1 in the paper. Be sure to comment on your results (hint: why is Table 1 included in the paper)._
+
+To do this, I performed t-tests on a set of baseline variables using the formula:
+
+\[
+t = \frac{\bar{X}_T - \bar{X}_C}{\sqrt{\frac{s_T^2}{n_T} + \frac{s_C^2}{n_C}}}
+\]
+
+```{python}
+import numpy as np
+import pandas as pd
+
+treated = df[df['treatment'] == 1]
+control = df[df['treatment'] == 0]
+
+table1_vars = [
+    'mrm2',    
+    'hpa',      
+    'freq',      
+    'years',     
+    'year5',     
+    'female', 'couple',
+    'redcty',
+    'nonlit', 'cases'
+]
+
+def manual_ttest(var):
+    Xt, Xc = treated[var], control[var]
+    mean_diff = Xt.mean() - Xc.mean()
+    pooled_se = np.sqrt(Xt.var(ddof=1)/len(Xt) + Xc.var(ddof=1)/len(Xc))
+    t_stat = mean_diff / pooled_se
+    return {
+        "Variable": var,
+        "Mean_Treatment": round(Xt.mean(), 3),
+        "Mean_Control": round(Xc.mean(), 3),
+        "t-stat": round(t_stat, 4)
+    }
+
+manual_ttest_df = pd.DataFrame([manual_ttest(v) for v in table1_vars])
+manual_ttest_df
+```
+
+This table replicates the balance check presented in Table 1 of Karlan & List (2007), using a manual t-test formula to compare pre-treatment characteristics across the treatment and control groups. The variables cover donor behavior (e.g., months since last donation, prior contributions), demographics (e.g., gender, race, household size), and political/geographic indicators (e.g., red state/county, legal involvement of the organization). Across all tested variables, the t-statistics remain small (generally below ±2), and none of the differences reach conventional levels of statistical significance. This provides strong evidence that the treatment assignment was effectively randomized and groups are balanced on observable characteristics. This confirms the reliability of the experiment design and supports the validity of later comparisons on donation behavior.
+
+```{python}
+from tabulate import tabulate
+import statsmodels.formula.api as smf
+
+# Run regressions
+reg_results = []
+for var in table1_vars:
+    model = smf.ols(f"{var} ~ treatment", data=df).fit()
+    reg_results.append([
+        var,
+        round(model.params["treatment"], 4),
+        round(model.pvalues["treatment"], 4),
+        round(model.rsquared, 4)
+    ])
+
+# Display as a formatted markdown table
+headers = ["Variable", "Treatment Coef", "p-value", "R-squared"]
+print(tabulate(reg_results, headers=headers, tablefmt="github"))
+```
+
+This regression-based balance check complements the earlier t-tests by estimating the relationship between treatment assignment and baseline covariates. For each variable, we regress it on the `treatment` indicator and inspect the coefficient and p-value. All p-values are well above the 0.05 threshold, confirming that treatment status is not significantly associated with any pre-treatment variable. This is consistent with the design of a randomized controlled trial, further supporting the internal validity of the experiment. The results also match those from the manual t-tests, which is expected since the regression with a binary independent variable produces the same mean difference and inference as a t-test.
+
 
 
 ## Experimental Results
