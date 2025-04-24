@@ -10,16 +10,29 @@ callout-appearance: minimal # this hides the blue "i" icon on .callout-notes
 
 Dean Karlan at Yale and John List at the University of Chicago conducted a field experiment to test the effectiveness of different fundraising letters. They sent out 50,000 fundraising letters to potential donors, randomly assigning each letter to one of three treatments: a standard letter, a matching grant letter, or a challenge grant letter. They published the results of this experiment in the _American Economic Review_ in 2007. The article and supporting data are available from the [AEA website](https://www.aeaweb.org/articles?id=10.1257/aer.97.5.1774) and from Innovations for Poverty Action as part of [Harvard's Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/27853&version=4.2).
 
-_to do: expand on the description of the experiment._
+This study provides a valuable opportunity to investigate whether the presence and size of a matching grant—commonly used by nonprofits—significantly affects donor behavior. The matching grant acts as a potential price reduction for donating, which may alter individuals’ willingness to give. The experiment’s large sample and randomized design make it especially well-suited to test economic theories of altruism, incentives, and social signaling.
 
-This project seeks to replicate their results.
-
+This project seeks to replicate the core findings of Karlan and List (2007), using the original dataset provided by the authors. Through our replication, we aim to confirm their main results, including how matching grants affect both the likelihood of donating and the average amount donated. We also explore potential heterogeneity in treatment effects by political geography, as highlighted in the original paper.
 
 ## Data
 
 ### Description
 
 _todo: Read the data into R/Python and describe the data_
+
+```{python}
+# Load necessary libraries
+import pandas as pd
+
+# Load the dataset
+df = pd.read_stata("karlan_list_2007.dta")
+
+# Preview the dataset
+df.head()
+
+# Describe key variables
+df.describe(include='all').transpose()
+```
 
 :::: {.callout-note collapse="true"}
 ### Variable Definitions
