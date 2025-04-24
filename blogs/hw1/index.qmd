@@ -196,7 +196,7 @@ donation_rates.plot(kind="bar", color=["gray", "orange"])
 plt.title("Proportion of People Who Donated")
 plt.ylabel("Donation Rate")
 plt.xticks(rotation=0)
-plt.ylim(0, 0.05)  
+plt.ylim(0, 0.04)  
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.tight_layout()
 plt.show()
@@ -333,10 +333,86 @@ These findings provide further evidence that increasing the match ratio beyond 1
 In this subsection, I analyze the effect of the size of matched donation on the size of the charitable contribution.
 
 _todo: Calculate a t-test or run a bivariate linear regression of the donation amount on the treatment status. What do we learn from doing this analysis?_
+```{python}
+from scipy.stats import ttest_ind
+
+t_stat, p_val = ttest_ind(treated["amount"], control["amount"], equal_var=False)
+print(f"t-statistic: {t_stat:.4f}, p-value: {p_val:.4f}")
+```
+
+```{python}
+import statsmodels.formula.api as smf
+from tabulate import tabulate
+
+model_amt = smf.ols("amount ~ treatment", data=df).fit()
+
+summary_table = [
+    ["Intercept (Control)", model_amt.params["Intercept"], model_amt.pvalues["Intercept"]],
+    ["Treatment Coef", model_amt.params["treatment"], model_amt.pvalues["treatment"]],
+    ["R-squared", model_amt.rsquared, ""]
+]
+print(tabulate(summary_table, headers=["Term", "Coef", "p-value"], tablefmt="github"))
+```
+
+This analysis tests whether the average donation amount differs between the treatment and control groups — regardless of whether someone donated or not (i.e., this includes all the zeros). Both the t-test and linear regression show that the mean donation amount is slightly higher in the treatment group, but the difference is small in magnitude and statistically weak. The low R-squared value also indicates that treatment status explains very little of the variance in donation amounts. This suggests that while matched donations may influence whether people give, they don’t strongly influence how much they give, at least when considering all individuals (including those who gave $0). To better understand donation behavior among actual donors, we’ll refine this analysis next by limiting it to individuals who did donate.
+
 
 _todo: now limit the data to just people who made a donation and repeat the previous analysis. This regression allows you to analyze how much respondents donate conditional on donating some positive amount. Interpret the regression coefficients -- what did we learn? Does the treatment coefficient have a causal interpretation?_ 
+```{python}
+donors_only = df[df["gave"] == 1]
+
+model_conditional = smf.ols("amount ~ treatment", data=donors_only).fit()
+
+summary_table = [
+    ["Intercept (Control)", model_conditional.params["Intercept"], model_conditional.pvalues["Intercept"]],
+    ["Treatment Coef", model_conditional.params["treatment"], model_conditional.pvalues["treatment"]],
+    ["R-squared", model_conditional.rsquared, ""]
+]
+print(tabulate(summary_table, headers=["Term", "Coef", "p-value"], tablefmt="github"))
+```
+
+By focusing only on those who actually donated, this regression estimates how much more (or less) people gave if they were in the treatment group compared to the control group. The estimated coefficient on `treatment` now reflects the difference in average gift size conditional on donating. The result shows that the treatment has very little effect on the amount donated among those who gave something — the coefficient is small and statistically insignificant. This finding supports the idea that the matching grant mainly affects the decision to donate, not the amount donated once that decision is made. In other words, treatment increases the extensive margin (whether to give), but not the intensive margin (how much to give). Regarding causal interpretation: since treatment was randomly assigned, and we're conditioning on an outcome (`gave`), the estimate does not have a strict causal interpretation. It's subject to selection bias — those who gave in treatment might be different in unobservable ways from those who gave in control. So we interpret this descriptively rather than causally.
+
 
 _todo: Make two plot: one for the treatment group and one for the control. Each plot should be a histogram of the donation amounts only among people who donated. Add a red vertical bar or some other annotation to indicate the sample average for each plot._
+
+```{python}
+import matplotlib.pyplot as plt
+
+donors_only = df[df["gave"] == 1]
+
+treat_donors = donors_only[donors_only["treatment"] == 1]["amount"]
+control_donors = donors_only[donors_only["treatment"] == 0]["amount"]
+
+mean_treat = treat_donors.mean()
+mean_control = control_donors.mean()
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
+
+# Treatment plot
+axes[0].hist(treat_donors, bins=30, color='orange', edgecolor='black', alpha=0.8)
+axes[0].axvline(mean_treat, color='red', linestyle='--', label=f'Mean = {mean_treat:.2f}')
+axes[0].set_title("Treatment Group")
+axes[0].set_xlabel("Donation Amount ($)")
+axes[0].set_ylabel("Number of Donors")
+axes[0].legend()
+
+# Control plot
+axes[1].hist(control_donors, bins=30, color='lightgreen', edgecolor='black', alpha=0.8)
+axes[1].axvline(mean_control, color='red', linestyle='--', label=f'Mean = {mean_control:.2f}')
+axes[1].set_title("Control Group")
+axes[1].set_xlabel("Donation Amount ($)")
+axes[1].legend()
+
+fig.suptitle("Histogram of Donation Amounts (Among Donors Only)", fontsize=14)
+plt.tight_layout()
+plt.show()
+```
+
+These histograms visualize the distribution of donation amounts among those who gave, separately for the treatment and control groups. The red vertical lines represent the sample average donation in each group. Below are the main observations: 
+    - Both distributions are highly right-skewed with many small donations and a few large outliers.
+    - The average donation amount is slightly lower in the treatment group than in the control group.
+These observations align with earlier regression findings showing that while matched gifts increase the likelihood of donating, they do not increase the amount given by those who choose to donate. This suggests that matching gifts influence whether people give, but not how much they give, reinforcing the psychological interpretation that matched gifts are more about prompting action than amplifying generosity.
 
 
 ## Simulation Experiment
