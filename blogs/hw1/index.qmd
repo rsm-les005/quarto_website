@@ -38,7 +38,7 @@ df = pd.read_stata("karlan_list_2007.dta")
 This following table provides an overview of all variables in the dataset. It includes each variable’s name, its data type (e.g., numeric or categorical), and the number of missing values.
 
 ```{python}
-#| echo: false
+#| echo: true
 #| code-fold: true
 overview_table = pd.DataFrame({
     "Variable": df.columns,
