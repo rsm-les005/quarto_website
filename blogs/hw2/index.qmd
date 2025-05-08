@@ -266,16 +266,43 @@ coef_table = pd.DataFrame({
     "Estimate": beta_hat,
     "Std. Error": se
 })
-coef_table
+coef_table.round(4)
 ```
-
 
 _todo: Check your results using R's glm() function or Python sm.GLM() function._
 
+To confirm the accuracy of our hand-coded Poisson regression, we also estimate the model using `statsmodels.GLM` with the Poisson family. The table below presents the coefficient estimates, standard errors, z-scores, and confidence intervals.
+
+```{python}
+import statsmodels.api as sm
+
+# Fit the Poisson regression using GLM
+glm_model = sm.GLM(Y, X_mat, family=sm.families.Poisson())
+glm_results = glm_model.fit()
+
+# Display results in a clean table
+glm_summary = glm_results.summary2().tables[1].reset_index().rename(columns={"index": "Variable"})
+glm_summary.round(4)
+```
+
 _todo: Interpret the results._ 
+
+The table above summarizes the results from our Poisson regression model using statsmodels. Here's what we observe:
+
+x1 (age): The coefficient is positive and highly significant (p<0.001), indicating that older firms tend to receive more patents, all else equal.
+
+x2 (age squared): The coefficient is small, negative, and also highly significant. This suggests a concave relationship — the positive effect of age diminishes at higher ages, meaning the relationship between age and patents is likely hump-shaped.
+
+x3 (iscustomer): The customer indicator is positive and significant. This implies that firms who use Blueprinty's software are associated with higher patent counts, controlling for other factors. This is consistent with the hypothesis that the software may help firms better navigate the patent process.
+
+x4 to x7 (region dummies): None of the region dummy variables are statistically significant at conventional levels (p>0.05). This suggests that after controlling for age and customer status, the region of a firm does not meaningfully affect patent count in this sample.
+
+Intercept (const): The baseline level of patenting (for a non-customer firm with age zero in the reference region) is negative, as expected — but not of direct substantive interest.
+
 
 _todo: What do you conclude about the effect of Blueprinty's software on patent success? Because the beta coefficients are not directly interpretable, it may help to create two fake datasets: X_0 and X_1 where X_0 is the X data but with iscustomer=0 for every observation and X_1 is the X data but with iscustomer=1 for every observation. Then, use X_0 and your fitted model to get the vector of predicted number of patents (y_pred_0) for every firm in the dataset, and use X_1 to get Y_pred_1 for every firm. Then subtract y_pred_1 minus y_pred_0 and take the average of that vector of differences._
 
+To better interpret the effect of using Blueprinty's software, we computed the average difference in predicted patent counts between identical firms who do and do not use the software. Holding all other variables constant, we find that being a customer of Blueprinty is associated with **0.79 more patents**, on average. This provides further support for the hypothesis that the software may positively impact patent success.
 
 
 
