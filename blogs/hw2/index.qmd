@@ -44,12 +44,13 @@ Next, a histogram of number of patens distribution by customer status bellow com
 # Set up the plot style
 sns.set(style="whitegrid")
 means = blueprinty.groupby("iscustomer")["patents"].mean()
+palette = {0: "orange", 1: "green"}
 # Histogram of number of patents by customer status
 plt.figure(figsize=(8, 5))
-sns.histplot(data=blueprinty, x="patents", hue="iscustomer", multiple="dodge", binwidth=1, palette={0: "orange", 1: "green"})
+sns.histplot(data=blueprinty, x="patents", hue="iscustomer", multiple="dodge", binwidth=1, palette=palette)
 
-plt.axvline(means[0], color="orange", linestyle="--", linewidth=2, label="Mean (Non-customer)")
-plt.axvline(means[1], color="green", linestyle="--", linewidth=2, label="Mean (Customer)")
+plt.axvline(means[0], color=palette[0], linestyle="--", linewidth=2, label="Mean (Non-customer)")
+plt.axvline(means[1], color=palette[1], linestyle="--", linewidth=2, label="Mean (Customer)")
 
 plt.title("Distribution of Patents by Customer Status")
 plt.xlabel("Number of Patents")
