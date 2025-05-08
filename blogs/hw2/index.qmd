@@ -17,7 +17,6 @@ However, Blueprinty has collected data on 1,500 mature (non-startup) engineering
 
 ### Data
 
-_todo: Read in data._
 Now, let's first read in the Blueprinty data.
 ```{python}
 import pandas as pd
@@ -28,34 +27,68 @@ import seaborn as sns
 blueprinty = pd.read_csv("blueprinty.csv")
 
 # Quick look at the data
-blueprinty.describe().round(3)
+desc = blueprinty.describe()
+desc_rounded = desc.copy()
+desc_rounded.loc["mean"] = desc_rounded.loc["mean"].round(2)
+desc_rounded.loc["std"] = desc_rounded.loc["std"].round(2)
+desc_rounded.loc[~desc_rounded.index.isin(["mean", "std"])] = desc_rounded.loc[~desc_rounded.index.isin(["mean", "std"])].round(0)
+desc_rounded.style\
+    .format("{:.2f}", subset=pd.IndexSlice["mean", :])\
+    .format("{:.2f}", subset=pd.IndexSlice["std", :])\
+    .format("{:.0f}", subset=pd.IndexSlice[["count", "min", "25%", "50%", "75%", "max"], :])
 ```
 
-
-_todo: Compare histograms and means of number of patents by customer status. What do you observe?_
-
+Next, a histogram of number of patens distribution by customer status bellow compares differences between customer groups. 
 ```{python}
 # Set up the plot style
 sns.set(style="whitegrid")
-
+means = blueprinty.groupby("iscustomer")["patents"].mean()
 # Histogram of number of patents by customer status
 plt.figure(figsize=(8, 5))
 sns.histplot(data=blueprinty, x="patents", hue="iscustomer", multiple="dodge", binwidth=1)
+
+plt.axvline(means[0], color="orange", linestyle="--", linewidth=2, label="Mean (Non-customer)")
+plt.axvline(means[1], color="blue", linestyle="--", linewidth=2, label="Mean (Customer)")
+
 plt.title("Distribution of Patents by Customer Status")
 plt.xlabel("Number of Patents")
+plt.ylabel("Count")
+plt.legend(title="Customer Status", labels=["Non-customer", "Customer"])
+plt.tight_layout()
+plt.show()
+```
+From the histogram and mean values, it appears that customers of Blueprinty's software tend to have more patents on average than non-customers. This may suggest that the software is associated with greater patenting success, but further modeling is necessary to control for confounding variables.
+
+Blueprinty customers are not selected at random. It may be important to account for systematic differences in the age and regional location of customers vs non-customers.
+
+After observing that Blueprinty customers might not be randomly selected, we explore whether there are systematic differences in region and firm age between customers and non-customers.
+
+```{python}
+# Bar plot of region distribution by customer status
+plt.figure(figsize=(8, 4))
+sns.countplot(data=blueprinty, x="region", hue="iscustomer")
+plt.title("Region Distribution by Customer Status")
+plt.xlabel("Region")
 plt.ylabel("Count")
 plt.legend(title="Customer", labels=["Non-customer", "Customer"])
 plt.tight_layout()
 plt.show()
 ```
 
+The plot shows that customer adoption varies by region. For instance, the Northeast has a disproportionately high number of customers, while the Southwest and Northwest are dominated by non-customers. This implies that regional variation could confound any relationship between software usage and patenting success, so it should be accounted for in modeling.
 
+```{python}
+# Boxplot of age by customer status
+plt.figure(figsize=(8, 4))
+sns.boxplot(data=blueprinty, x="iscustomer", y="age")
+plt.title("Age Distribution by Customer Status")
+plt.xlabel("Customer Status (0 = Non-customer, 1 = Customer)")
+plt.ylabel("Age")
+plt.tight_layout()
+plt.show()
+```
 
-
-Blueprinty customers are not selected at random. It may be important to account for systematic differences in the age and regional location of customers vs non-customers.
-
-_todo: Compare regions and ages by customer status. What do you observe?_
-
+Customers appear to be slightly older than non-customers, with a higher median and a broader age distribution. While the difference is modest, it still points to the possibility that more mature firms are more likely to adopt Blueprinty's tools. Again, this reinforces the need to adjust for age when estimating treatment effects.
 
 ### Estimation of Simple Poisson Model
 
