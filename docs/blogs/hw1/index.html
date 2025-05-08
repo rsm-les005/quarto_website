@@ -235,7 +235,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 - Demographic indicators and prior donation history (e.g., years since first gift, total number of past donations, gender).
 - Geographic and political indicators such as whether the donor lived in a “red” or “blue” state during the 2004 presidential election, and the level of activity of the organization in that state.</code></pre>
 <p>The following Python code chunk loads the original dataset Dean Karlan used:</p>
-<div id="ab644763" class="cell" data-execution_count="1">
+<div id="93fbdd83" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -246,7 +246,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="data-overview" class="level3">
 <h3 class="anchored" data-anchor-id="data-overview">Data Overview</h3>
 <p>This following table provides an overview of all variables in the dataset. It includes each variable’s name, its data type (e.g., numeric or categorical), and the number of missing values.</p>
-<div id="167e9890" class="cell" data-execution_count="2">
+<div id="93b814b4" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>overview_table <span class="op">=</span> pd.DataFrame({</span>
@@ -587,7 +587,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="variable-definitions" class="level3">
 <h3 class="anchored" data-anchor-id="variable-definitions">Variable Definitions</h3>
 <p>The summary statistics table below presents descriptive metrics for all numeric variables in this dataset, including count, mean, standard deviation, and range (min/max).</p>
-<div id="cbe217d8" class="cell" data-execution_count="3">
+<div id="5ef628f1" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df.describe().transpose().<span class="bu">round</span>(<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1382,7 +1382,7 @@ Variable Definitions
 <section id="balance-test" class="level3">
 <h3 class="anchored" data-anchor-id="balance-test">Balance Test</h3>
 <p>As an ad hoc test of the randomization mechanism, I provide a series of tests that compare aspects of the treatment and control groups to assess whether they are statistically significantly different from one another.</p>
-<div id="aeea9966" class="cell" data-execution_count="4">
+<div id="45beb1ea" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -1509,7 +1509,7 @@ Variable Definitions
 </div>
 </div>
 <p>This table replicates the balance check presented in Table 1 of Karlan &amp; List (2007), using a manual t-test formula to compare pre-treatment characteristics across the treatment and control groups. The variables cover donor behavior (e.g., months since last donation, prior contributions), demographics (e.g., gender, race, household size), and political/geographic indicators (e.g., red state/county, legal involvement of the organization). Across all tested variables, the t-statistics remain small (generally below ±2), and none of the differences reach conventional levels of statistical significance. This provides strong evidence that the treatment assignment was effectively randomized and groups are balanced on observable characteristics. This confirms the reliability of the experiment design and supports the validity of later comparisons on donation behavior.</p>
-<div id="c7dbfc39" class="cell" data-execution_count="5">
+<div id="02ed31c9" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># from tabulate import tabulate</span></span>
@@ -1629,7 +1629,7 @@ Variable Definitions
 <section id="charitable-contribution-made" class="level3">
 <h3 class="anchored" data-anchor-id="charitable-contribution-made">Charitable Contribution Made</h3>
 <p>First, I analyze whether matched donations lead to an increased response rate of making a donation.</p>
-<div id="04643d4b" class="cell" data-execution_count="6">
+<div id="6be0d2b9" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -1654,7 +1654,7 @@ Variable Definitions
 </div>
 </div>
 <p>This plot displays the proportion of individuals who made a charitable contribution in the control and treatment groups. The donation rate is noticeably higher in the treatment group, indicating that the presence of a matching donation offer likely increased the likelihood of giving. This supports the hypothesis that matched donations can serve as an effective behavioral nudge in charitable fundraising.</p>
-<div id="b7025fe6" class="cell" data-execution_count="7">
+<div id="39671aee" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> ttest_ind</span>
@@ -1670,7 +1670,7 @@ Variable Definitions
 <pre><code>t-statistic: 3.2095, p-value: 0.0013</code></pre>
 </div>
 </div>
-<div id="85a0e2a2" class="cell" data-execution_count="8">
+<div id="b0b2c2e7" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
@@ -1720,7 +1720,7 @@ Variable Definitions
 </div>
 </div>
 <p>Both the t-test and linear regression show a statistically significant difference in donation behavior between the treatment and control groups. Individuals who received a letter mentioning a matching grant were more likely to donate than those who received a standard letter. This finding replicates Table 2a Panel A of Karlan &amp; List (2007), and supports the hypothesis that matched donations act as a strong psychological motivator. From a behavioral standpoint, it suggests that people are more inclined to give when their contributions feel amplified — they may view their gift as having a greater impact, which encourages them to take action. This simple intervention—adding a match offer—significantly influenced behavior even though the individuals in both groups received similar messages aside from that detail.</p>
-<div id="4b572349" class="cell" data-execution_count="9">
+<div id="04056821" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
@@ -1777,7 +1777,7 @@ Variable Definitions
 <section id="differences-between-match-rates" class="level3">
 <h3 class="anchored" data-anchor-id="differences-between-match-rates">Differences between Match Rates</h3>
 <p>Next, I assess the effectiveness of different sizes of matched donations on the response rate.</p>
-<div id="e75e17a1" class="cell" data-execution_count="10">
+<div id="4c1e8e23" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> ttest_ind</span>
@@ -1841,7 +1841,7 @@ Variable Definitions
 </div>
 </div>
 <p>The t-tests above examine whether increasing the match ratio (from 1:1 to 2:1 or 3:1) significantly affects the probability of donating. The results show that the differences in donation rates are not statistically significant** at conventional levels. This finding aligns with the authors’ comment on page 8 of Karlan &amp; List (2007), where they state that “the figures suggest that higher match ratios did not lead to significantly greater giving rates.” Despite intuitive expectations, offering a 2:1 or 3:1 match did not lead to more people donating compared to a 1:1 match. This suggests that the psychological impact of having any match available may be more important than the generosity of the multiplier itself.</p>
-<div id="9e7f0537" class="cell" data-execution_count="11">
+<div id="5954a09e" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
@@ -1899,7 +1899,7 @@ Variable Definitions
 </div>
 </div>
 <p>This regression estimates the donation probability under different match ratios, using <code>ratio1</code> (1:1 match) as the baseline category. The intercept represents the average donation rate for the 1:1 group, while the coefficients for <code>ratio2</code> and <code>ratio3</code> represent the change in probability relative to that baseline. The results confirm that there are no statistically significant differences in donation rates when comparing 2:1 or 3:1 match ratios to the 1:1 ratio. These coefficients are close to zero and accompanied by large p-values, reinforcing the earlier t-test findings. In line with the authors’ interpretation, this suggests that increasing the match ratio beyond 1:1 does not further motivate giving** — the existence of a match alone may be the primary driver of behavioral change, rather than its size.</p>
-<div id="92e6af08" class="cell" data-execution_count="12">
+<div id="36541dd7" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>coef_ratio1 <span class="op">=</span> model.params[<span class="st">"Intercept"</span>]</span>
@@ -1952,7 +1952,7 @@ Variable Definitions
 <section id="size-of-charitable-contribution" class="level3">
 <h3 class="anchored" data-anchor-id="size-of-charitable-contribution">Size of Charitable Contribution</h3>
 <p>In this subsection, I analyze the effect of the size of matched donation on the size of the charitable contribution.</p>
-<div id="8864a49f" class="cell" data-execution_count="13">
+<div id="916079b1" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> ttest_ind</span>
@@ -1964,7 +1964,7 @@ Variable Definitions
 <pre><code>t-statistic: 1.9183, p-value: 0.0551</code></pre>
 </div>
 </div>
-<div id="ff8cc4a7" class="cell" data-execution_count="14">
+<div id="f03bdcf8" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
@@ -2020,7 +2020,7 @@ Variable Definitions
 </div>
 </div>
 <p>This analysis tests whether the average donation amount differs between the treatment and control groups — regardless of whether someone donated or not (i.e., this includes all the zeros). Both the t-test and linear regression show that the mean donation amount is slightly higher in the treatment group, but the difference is small in magnitude and statistically weak. The low R-squared value also indicates that treatment status explains very little of the variance in donation amounts. This suggests that while matched donations may influence whether people give, they don’t strongly influence how much they give, at least when considering all individuals (including those who gave $0). To better understand donation behavior among actual donors, we’ll refine this analysis next by limiting it to individuals who did donate.</p>
-<div id="94a40cc8" class="cell" data-execution_count="15">
+<div id="45f8a658" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>donors_only <span class="op">=</span> df[df[<span class="st">"gave"</span>] <span class="op">==</span> <span class="dv">1</span>]</span>
@@ -2075,7 +2075,7 @@ Variable Definitions
 </div>
 </div>
 <p>By focusing only on those who actually donated, this regression estimates how much more (or less) people gave if they were in the treatment group compared to the control group. The estimated coefficient on <code>treatment</code> now reflects the difference in average gift size conditional on donating. The result shows that the treatment has very little effect on the amount donated among those who gave something — the coefficient is small and statistically insignificant. This finding supports the idea that the matching grant mainly affects the decision to donate, not the amount donated once that decision is made. In other words, treatment increases the extensive margin (whether to give), but not the intensive margin (how much to give). Regarding causal interpretation: since treatment was randomly assigned, and we’re conditioning on an outcome (<code>gave</code>), the estimate does not have a strict causal interpretation. It’s subject to selection bias — those who gave in treatment might be different in unobservable ways from those who gave in control. So we interpret this descriptively rather than causally.</p>
-<div id="9fa005d5" class="cell" data-execution_count="16">
+<div id="edacb94d" class="cell" data-execution_count="16">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -2125,7 +2125,7 @@ Variable Definitions
 <p>As a reminder of how the t-statistic “works,” in this section I use simulation to demonstrate the Law of Large Numbers and the Central Limit Theorem.</p>
 <p>Suppose the true distribution of respondents who do not get a charitable donation match is Bernoulli with probability p=0.018 that a donation is made.</p>
 <p>Further suppose that the true distribution of respondents who do get a charitable donation match of any size is Bernoulli with probability p=0.022 that a donation is made.</p>
-<div id="ad619c8e" class="cell" data-execution_count="17">
+<div id="40e011fd" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -2170,7 +2170,7 @@ Variable Definitions
 <p>This visually demonstrates how small but real differences can become detectable with sufficient sample size and repeated sampling — a core insight from the Law of Large Numbers and Central Limit Theorem.</p>
 <section id="law-of-large-numbers" class="level3">
 <h3 class="anchored" data-anchor-id="law-of-large-numbers">Law of Large Numbers</h3>
-<div id="8484d55c" class="cell" data-execution_count="18">
+<div id="28742ce0" class="cell" data-execution_count="18">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -2210,7 +2210,7 @@ Variable Definitions
 </section>
 <section id="central-limit-theorem" class="level3">
 <h3 class="anchored" data-anchor-id="central-limit-theorem">Central Limit Theorem</h3>
-<div id="a5f149d3" class="cell" data-execution_count="19">
+<div id="c74a5d75" class="cell" data-execution_count="19">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>

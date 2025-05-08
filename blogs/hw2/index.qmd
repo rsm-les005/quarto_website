@@ -129,7 +129,6 @@ def poisson_loglikelihood(lambda_, Y):
 
 This function will allow us to evaluate the fit of any given λ to the data. In the next step, we’ll search for the value of λ that maximizes this log-likelihood — our Maximum Likelihood Estimate (MLE).
 
-_todo: Use your function to plot lambda on the horizontal axis and the likelihood (or log-likelihood) on the vertical axis for a range of lambdas (use the observed number of patents as the input for Y)._
 ```{python}
 # Define a range of lambda values to evaluate
 lambda_vals = np.linspace(0.1, 10, 200)
@@ -147,9 +146,6 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 ```
-
-
-_todo: If you're feeling mathematical, take the first derivative of your likelihood or log-likelihood, set it equal to zero and solve for lambda. You will find lambda_mle is Ybar, which "feels right" because the mean of a Poisson distribution is lambda._
 
 Let’s now find the Maximum Likelihood Estimate (MLE) for **lambda** by taking the derivative of the log-likelihood and setting it equal to zero:
 
@@ -174,9 +170,6 @@ lambda_mle = blueprinty["patents"].mean()
 lambda_mle.round(3)
 ```
 
-
-_todo: Find the MLE by optimizing your likelihood function with optim() in R or sp.optimize() in Python._
-
 We can now find the Maximum Likelihood Estimate (MLE) for **lambda** numerically by maximizing the log-likelihood function. Since `scipy.optimize` performs minimization, we minimize the *negative* log-likelihood over a reasonable range of values for **lambda**.
 
 ```{python}
@@ -198,8 +191,6 @@ The numerical estimate of lambda (MLE) is **3.685**, which matches the sample me
 
 Next, we extend our simple Poisson model to a Poisson Regression Model such that $Y_i = \text{Poisson}(\lambda_i)$ where $\lambda_i = \exp(X_i'\beta)$. The interpretation is that the success rate of patent awards is not constant across all firms ($\lambda$) but rather is a function of firm characteristics $X_i$. Specifically, we will use the covariates age, age squared, region, and whether the firm is a customer of Blueprinty.
 
-_todo: Update your likelihood or log-likelihood function with an additional argument to take in a covariate matrix X. Also change the parameter of the model from lambda to the beta vector. In this model, lambda must be a positive number, so we choose the inverse link function g_inv() to be exp() so that_ $\lambda_i = e^{X_i'\beta}$. _For example:_
-
 ```{python}
 import numpy as np
 from scipy.special import gammaln
@@ -211,8 +202,6 @@ def poisson_regression_loglikelihood(beta, Y, X):
     loglik = np.sum(-lambda_ + Y * np.log(lambda_ + 1e-10) - gammaln(Y + 1))
     return loglik
 ```
-
-_todo: Use your function along with R's optim() or Python's sp.optimize() to find the MLE vector and the Hessian of the Poisson model with covariates. Specifically, the first column of X should be all 1's to enable a constant term in the model, and the subsequent columns should be age, age squared, binary variables for all but one of the regions, and the binary customer variable. Use the Hessian to find standard errors of the beta parameter estimates and present a table of coefficients and standard errors._
 
 We prepare the covariate matrix X so that it has the structure needed for Poisson regression: a constant column, numeric variables, and encoded categorical variables.
 
@@ -269,8 +258,6 @@ coef_table = pd.DataFrame({
 coef_table.round(4)
 ```
 
-_todo: Check your results using R's glm() function or Python sm.GLM() function._
-
 To confirm the accuracy of our hand-coded Poisson regression, we also estimate the model using `statsmodels.GLM` with the Poisson family. The table below presents the coefficient estimates, standard errors, z-scores, and confidence intervals.
 
 ```{python}
@@ -285,26 +272,31 @@ glm_summary = glm_results.summary2().tables[1].reset_index().rename(columns={"in
 glm_summary.round(4)
 ```
 
-_todo: Interpret the results._ 
-
 The table above summarizes the results from our Poisson regression model using statsmodels. Here's what we observe:
 
-x1 (age): The coefficient is positive and highly significant (p<0.001), indicating that older firms tend to receive more patents, all else equal.
+- x1 (age): The coefficient is positive and highly significant (p<0.001), indicating that older firms tend to receive more patents, all else equal.
 
-x2 (age squared): The coefficient is small, negative, and also highly significant. This suggests a concave relationship — the positive effect of age diminishes at higher ages, meaning the relationship between age and patents is likely hump-shaped.
+- x2 (age squared): The coefficient is small, negative, and also highly significant. This suggests a concave relationship — the positive effect of age diminishes at higher ages, meaning the relationship between age and patents is likely hump-shaped.
 
-x3 (iscustomer): The customer indicator is positive and significant. This implies that firms who use Blueprinty's software are associated with higher patent counts, controlling for other factors. This is consistent with the hypothesis that the software may help firms better navigate the patent process.
+- x3 (iscustomer): The customer indicator is positive and significant. This implies that firms who use Blueprinty's software are associated with higher patent counts, controlling for other factors. This is consistent with the hypothesis that the software may help firms better navigate the patent process.
 
-x4 to x7 (region dummies): None of the region dummy variables are statistically significant at conventional levels (p>0.05). This suggests that after controlling for age and customer status, the region of a firm does not meaningfully affect patent count in this sample.
+- x4 to x7 (region dummies): enderNone of the region dummy variables are statistically significant at conventional levels (p>0.05). This suggests that after controlling for age and customer status, the region of a firm does not meaningfully affect patent count in this sample.
 
-Intercept (const): The baseline level of patenting (for a non-customer firm with age zero in the reference region) is negative, as expected — but not of direct substantive interest.
-
-
-_todo: What do you conclude about the effect of Blueprinty's software on patent success? Because the beta coefficients are not directly interpretable, it may help to create two fake datasets: X_0 and X_1 where X_0 is the X data but with iscustomer=0 for every observation and X_1 is the X data but with iscustomer=1 for every observation. Then, use X_0 and your fitted model to get the vector of predicted number of patents (y_pred_0) for every firm in the dataset, and use X_1 to get Y_pred_1 for every firm. Then subtract y_pred_1 minus y_pred_0 and take the average of that vector of differences._
-
-To better interpret the effect of using Blueprinty's software, we computed the average difference in predicted patent counts between identical firms who do and do not use the software. Holding all other variables constant, we find that being a customer of Blueprinty is associated with **0.79 more patents**, on average. This provides further support for the hypothesis that the software may positively impact patent success.
+- Intercept (const): The baseline level of patenting (for a non-customer firm with age zero in the reference region) is negative, as expected — but not of direct substantive interest.
 
 
+
+Due to the nonlinear nature of the Poisson regression model, the estimated coefficients—particularly for binary variables like iscustomer—are not directly interpretable in terms of marginal effects on the outcome variable. That is, the coefficient on iscustomer does not represent a constant additive change in the expected number of patents.
+
+To obtain a more interpretable estimate of the effect of using Blueprinty's software, we implement a counterfactual prediction approach. Specifically, we construct two hypothetical datasets:
+
+- Scenario 1 (X₀): Each firm is treated as a non-customer (iscustomer = 0)
+
+- Scenario 2 (X₁): Each firm is treated as a customer (iscustomer = 1)
+
+All other covariates are held constant. We then use our fitted Poisson model to generate predicted patent counts for each firm under both scenarios. The average difference between the predicted outcomes under X₁ and X₀ represents the estimated effect of Blueprinty’s software on patenting activity.
+
+Based on this approach, we estimate that firms using Blueprinty's software produce, on average, 0.79 more patents than they would have without the software, holding all else equal. This provides evidence consistent with the hypothesis that the software enhances patenting success.
 
 ## AirBnB Case Study
 
@@ -332,9 +324,126 @@ AirBnB is a popular platform for booking short-term rentals. In March 2017, stud
 ::::
 
 
-_todo: Assume the number of reviews is a good proxy for the number of bookings. Perform some exploratory data analysis to get a feel for the data, handle or drop observations with missing values on relevant variables, build one or more models (e.g., a poisson regression model for the number of bookings as proxied by the number of reviews), and interpret model coefficients to describe variation in the number of reviews as a function of the variables provided._
+_todo: Assume the number of reviews is a good proxy for the number of bookings. Perform some exploratory data analysis to get a feel for the data, handle or drop observations with missing values on relevant variables, build one or more models (e.g., a poisson regression model for the number of bookings as proxied by the number of reviews), and interpret model coefficients to describe variation in the number of reviews as a function of the variables provided._ 
 
+### Load and Clean Data 
 
+We begin by loading the AirBnB dataset, which is shown as below. The goal is to understand what factors are associated with a higher number of reviews, which we treat as a proxy for booking activity. 
+```{python}
+import pandas as pd
 
+# Load the dataset
+airbnb = pd.read_csv("airbnb.csv")
+```
 
+Below is a summary of the dataset's structure and variable distributions.
+```{python}
+airbnb.describe().T
+```
+
+Several variables in the dataset contain missing values. Notably, over 10,000 listings are missing review scores related to value, location, and cleanliness—likely because those listings received no reviews. Since our outcome of interest is the number of reviews, we can reasonably restrict our analysis to listings with at least one review. Additionally, we drop a small number of rows with missing data in key listing features such as bathrooms, bedrooms, and host listing date. Here’s the code to filter and clean accordingly:
+
+```{python}
+# Drop listings with zero reviews
+airbnb_filtered = airbnb[airbnb["number_of_reviews"] > 0].copy()
+
+# Drop rows with missing values in relevant predictors
+cols_to_check = ["bathrooms", "bedrooms", "host_since",
+                 "review_scores_cleanliness", "review_scores_location", "review_scores_value"]
+airbnb_filtered = airbnb_filtered.dropna(subset=cols_to_check)
+```
+
+### Exploratory Data Analysis
+To begin, we examine the distributions of key variables:
+
+```{python}
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set(style="whitegrid")
+
+fig, axes = plt.subplots(2, 2, figsize=(12, 8))
+
+sns.histplot(airbnb_filtered["number_of_reviews"], bins=50, kde=False, ax=axes[0, 0])
+axes[0, 0].set_title("Number of Reviews")
+
+sns.histplot(airbnb_filtered["price"], bins=50, kde=False, ax=axes[0, 1])
+axes[0, 1].set_title("Price per Night")
+
+sns.histplot(airbnb_filtered["review_scores_cleanliness"], bins=10, kde=False, ax=axes[1, 0])
+axes[1, 0].set_title("Cleanliness Score")
+
+sns.histplot(airbnb_filtered["review_scores_value"], bins=10, kde=False, ax=axes[1, 1])
+axes[1, 1].set_title("Value Score")
+
+plt.tight_layout()
+plt.show()
+```
+
+Number of Reviews: Highly right-skewed. Most listings receive a modest number of reviews, but a small number receive over 100. This validates the use of a count-based model such as Poisson regression.
+
+Price per Night: Also right-skewed, with the majority of listings priced under $500. A few outliers appear above $1,000.
+
+Review Scores (Cleanliness & Value): Both are tightly clustered near the upper end of the scale (around 9–10), suggesting generally favorable customer feedback with limited variation.
+
+These patterns support the idea that modeling review counts (as a proxy for bookings) using a Poisson regression is appropriate, provided we carefully control for influential predictors like price and review quality.
+
+### Poisson Regression: Predicting Number of Reviews
+
+We fit a Poisson regression model to predict the number of reviews (used as a proxy for bookings) based on a selection of listing characteristics.
+
+```{python}
+import statsmodels.api as sm
+import pandas as pd
+
+# Select predictors
+predictors = [
+    "price",
+    "review_scores_cleanliness",
+    "review_scores_location",
+    "review_scores_value",
+    "bedrooms",
+    "bathrooms"
+]
+
+# Drop rows with missing data
+airbnb_model_data = airbnb_filtered.dropna(subset=predictors + ["number_of_reviews"]).copy()
+
+# Create design matrix
+X = sm.add_constant(airbnb_model_data[predictors])
+Y = airbnb_model_data["number_of_reviews"]
+
+# Fit Poisson regression
+poisson_model = sm.GLM(Y, X, family=sm.families.Poisson()).fit()
+
+# Display summary
+summary_table = poisson_model.summary2().tables[1].reset_index().rename(columns={"index": "Variable"})
+summary_table.round(4)
+```
+
+- Intercept: Represents the expected log number of reviews when all predictors are at zero.
+- Price: Small, negative, and statistically significant — more expensive listings receive slightly fewer reviews, on average.
+- Review Scores – Cleanliness: Positive and highly significant. Cleanliness appears to drive guest engagement.
+- Review Scores – Location & Value: Both are negative and significant, which may seem surprising. This could reflect multicollinearity or indicate that higher ratings correspond with fewer, but higher-quality bookings.
+
+All coefficients are statistically significant at the 0.001 level, suggesting meaningful associations between listing characteristics and review frequency.
+
+### Model Fit: Predicted vs. Actual Reviews
+```{python}
+airbnb_model_data["predicted_reviews"] = poisson_model.predict(X)
+
+plt.figure(figsize=(8, 5))
+sns.scatterplot(
+    x=airbnb_model_data["number_of_reviews"],
+    y=airbnb_model_data["predicted_reviews"],
+    alpha=0.5
+)
+plt.xlabel("Actual Number of Reviews")
+plt.ylabel("Predicted Number of Reviews")
+plt.title("Predicted vs. Actual Number of Reviews (Poisson Model)")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+```
+Comparing predicted review counts from the Poisson model to the actual observed counts for each listing, the plot shows a strong positive relationship between actual and predicted values, especially for listings with fewer than 100 reviews. There is some deviation for listings with very high review counts, suggesting possible overdispersion—a common issue in count data where variance exceeds the mean. Despite this, the model captures the general trend well and provides a solid baseline for understanding how listing characteristics relate to booking activity.
 
