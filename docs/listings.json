@@ -1,0 +1,16 @@
+[
+  {
+    "listing": "/blogs.html",
+    "items": [
+      "/blogs/hw1/index.html",
+      "/blogs/hw2/index.html"
+    ]
+  },
+  {
+    "listing": "/projects.html",
+    "items": [
+      "/projects/project1/index.html",
+      "/projects/project2/index.html"
+    ]
+  }
+]
