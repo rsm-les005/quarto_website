@@ -313,30 +313,16 @@ def plot_trace_hist(samples, param_name):
 
 # Plot for price
 plot_trace_hist(posterior_df['price'], 'price')
-```
-From the trace plot, we observe that the sampler stabilizes after the burn-in period and mixes well throughout the chain. The histogram shows that the posterior distribution for \( \beta_{\text{price}} \) is centered around a negative value, consistent with our economic expectation that higher prices reduce choice probability.
-
-The `brand_P` coefficient represents the impact of Prime relative to the baseline (Hulu or Netflix). Its posterior distribution shows a moderate positive effect on choice probability.
-
-```{python}
 plot_trace_hist(posterior_df['brand_P'], 'brand_P')
+plot_trace_hist(posterior_df['brand_P'], 'brand_P')
+plot_trace_hist(posterior_df['ad_Yes'], 'ad_Yes')
 ```
+
+From the price trace plot, we observe that the sampler stabilizes after the burn-in period and mixes well throughout the chain. The histogram shows that the posterior distribution for \( \beta_{\text{price}} \) is centered around a negative value, consistent with our economic expectation that higher prices reduce choice probability.
 
 The trace plot for \( \beta_{\text{brand\_P}} \) shows good mixing behavior and no apparent trends or drifts. The posterior distribution indicates a positive effect of Prime on the likelihood of choice, suggesting that Prime is preferred relative to the baseline brand. However, the distribution has more spread compared to price, indicating greater uncertainty.
 
-The `brand_N` coefficient reflects the effect of Netflix relative to the baseline. The posterior mass is concentrated at a higher positive value, suggesting strong preference.
-
-```{python}
-plot_trace_hist(posterior_df['brand_N'], 'brand_N')
-```
-
 For \( \beta_{\text{brand\_N}} \), the trace plot is well-centered and shows tight convergence. The histogram shows a strongly positive distribution with little spread, suggesting that Netflix is consistently preferred across respondents. The density’s concentration implies high certainty about this positive utility effect.
-
-The `ad_Yes` coefficient measures the effect of showing an ad compared to not showing one. The posterior is clearly left-skewed, suggesting that ads significantly reduce utility.
-
-```{python}
-plot_trace_hist(posterior_df['ad_Yes'], 'ad_Yes')
-```
 
 The trace for \( \beta_{\text{ad\_Yes}} \) is stable and shows good mixing. The histogram is clearly left-skewed and centered below zero, indicating that the presence of an ad significantly reduces utility and likelihood of selection. This effect is both substantial and precisely estimated, as reflected in the sharp posterior peak.
 
@@ -346,7 +332,7 @@ We now summarize the Bayesian posterior draws by calculating the mean, standard 
 
 The 95% credible interval is computed as the 2.5th and 97.5th percentiles of the posterior samples. This reflects the Bayesian interpretation of uncertainty: there is a 95% probability that the true parameter lies within this interval, given the data and prior.
  ```{python}
- # Posterior summaries
+# Posterior summaries
 posterior_summary = pd.DataFrame({
     'Parameter': posterior_df.columns,
     'Posterior Mean': posterior_df.mean().values,
@@ -380,13 +366,13 @@ While the parameter estimates we obtained are informative, they reflect average 
 
 To simulate and estimate a multi-level (also called random-parameter or hierarchical) model, we would need to introduce respondent-level heterogeneity into the data-generating process. In contrast to our current model, which assumes fixed preferences across all respondents, a hierarchical model allows each individual to have their own set of part-worth utilities.
 
-**Changes needed for simulation:**
+###Changes needed for simulation:
 - Instead of assigning a single \(\beta\) vector for all individuals, we would draw a unique \(\beta_i\) for each respondent \(i\).
 - These respondent-specific \(\beta_i\)s would be drawn from a population-level distribution, typically multivariate normal:  
   \[ \beta_i \sim \mathcal{N}(\mu, \Sigma) \]
 - We would then simulate each respondent’s choices using their own \(\beta_i\).
 
-**Changes needed for estimation:**
+###Changes needed for estimation:
 - We could no longer use standard MLE. Instead, we would use Bayesian hierarchical modeling or simulated maximum likelihood (e.g., using techniques like Hierarchical Bayes, Gibbs sampling, or variational inference).
 - The estimation process would recover both the population-level parameters (\(\mu\), \(\Sigma\)) and the individual-level \(\beta_i\)s.
 
