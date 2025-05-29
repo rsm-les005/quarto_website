@@ -128,32 +128,103 @@ conjoint_data = conjoint_data[['resp', 'task', 'brand', 'ad', 'price', 'choice']
 
 The "hard part" of the MNL likelihood function is organizing the data, as we need to keep track of 3 dimensions (consumer $i$, covariate $k$, and product $j$) instead of the typical 2 dimensions for cross-sectional regression models (consumer $i$ and covariate $k$). The fact that each task for each respondent has the same number of alternatives (3) helps.  In addition, we need to convert the categorical variables for brand and ads into binary variables.
 
-_todo: reshape and prep the data_
 ```{python}
-# One-hot encode brand and ad
-X = pd.get_dummies(conjoint_data, columns=['brand', 'ad'], drop_first=True)
+import pandas as pd
 
-# Optional: rename columns for clarity
-X.rename(columns={
-    'brand_P': 'brand_Prime',
-    'brand_H': 'brand_Hulu',
-    'ad_Yes': 'ad_Yes'
-}, inplace=True)
+# Load data if needed (skip this if already in memory)
+df = pd.read_csv("conjoint_data.csv")
 
-# View the prepared data
-X.head()
+# Drop one dummy per variable to avoid multicollinearity
+df_encoded = pd.get_dummies(df, columns=['brand', 'ad'], drop_first=True)
+
+# Prepare final design matrix
+feature_cols = ['price', 'brand_P', 'brand_N', 'ad_Yes']
+X_data = df_encoded.copy()
+X_data[feature_cols] = X_data[feature_cols].astype(float)
+X = X_data[feature_cols].values
+
+# Target variable: 1 if alternative was chosen, 0 otherwise
+y = X_data['choice'].values
+
+# Create group ID per respondent-task (i.e., choice set)
+group_labels = X_data['resp'].astype(str) + "_" + X_data['task'].astype(str)
+group_ids = pd.factorize(group_labels)[0]
 ```
 
 
 ## 4. Estimation via Maximum Likelihood
 
-_todo: Code up the log-likelihood function._
+To estimate the parameters of the Multinomial Logit (MNL) model via maximum likelihood, we first need to specify the log-likelihood function. The MNL model assumes that the probability of a respondent choosing a particular alternative is a function of the observed attributes of that alternative and the model coefficients. The log-likelihood sums the log of these probabilities across all observed choices.
 
-_todo: Use `optim()` in R or `scipy.optimize()` in Python to find the MLEs for the 4 parameters ($\beta_\text{netflix}$, $\beta_\text{prime}$, $\beta_\text{ads}$, $\beta_\text{price}$), as well as their standard errors (from the Hessian). For each parameter construct a 95% confidence interval._
+Below, we define a Python function that computes the negative log-likelihood, which will later be minimized using numerical optimization techniques.
 
 ```{python}
+from scipy.special import logsumexp
+import numpy as np
 
+def neg_log_likelihood(beta, X, y, group_ids):
+    """
+    Computes the negative log-likelihood for a Multinomial Logit model.
+
+    Parameters:
+        beta: array-like, coefficients for each covariate
+        X: design matrix of covariates
+        y: binary array where 1 indicates the chosen alternative
+        group_ids: array marking which rows belong to the same choice set
+
+    Returns:
+        Negative log-likelihood (float)
+    """
+    utility = X @ beta
+    log_prob = np.empty_like(utility)
+
+    for g in np.unique(group_ids):
+        idx = group_ids == g
+        denom = logsumexp(utility[idx])
+        log_prob[idx] = utility[idx] - denom
+
+    return -np.sum(log_prob[y == 1])
 ```
+
+This function computes the probability of the chosen alternative within each choice task and returns the (negative) sum of their log-probabilities.
+
+With the log-likelihood function defined, we now use the `scipy.optimize.minimize()` function to find the Maximum Likelihood Estimates (MLEs) of the model parameters. The optimization routine minimizes the negative log-likelihood, and the inverse of the Hessian matrix gives us the variance-covariance matrix for the parameter estimates. From this, we compute standard errors and construct 95% confidence intervals for each coefficient.
+
+```{python}
+from scipy.optimize import minimize
+import pandas as pd
+
+# Initial guess for beta
+init_beta = np.zeros(X.shape[1])
+
+# Perform MLE via BFGS optimization
+result = minimize(neg_log_likelihood, init_beta, args=(X, y, group_ids), method='BFGS')
+
+# Extract coefficient estimates
+beta_hat = result.x
+
+# Compute standard errors from the inverse Hessian
+hessian_inv = result.hess_inv
+se = np.sqrt(np.diag(hessian_inv))
+
+# 95% confidence intervals
+ci_lower = beta_hat - 1.96 * se
+ci_upper = beta_hat + 1.96 * se
+
+# Create results DataFrame
+feature_cols = ['price', 'brand_P', 'brand_N', 'ad_Yes']
+results_df = pd.DataFrame({
+    'Parameter': feature_cols,
+    'Estimate': beta_hat,
+    'StdError': se,
+    '95% CI Lower': ci_lower,
+    '95% CI Upper': ci_upper
+})
+
+results_df
+```
+
+This output shows the estimated effect of each product attribute on utility. Positive coefficients indicate higher utility (and choice probability), while negative values indicate a deterrent effect. For example, a negative price coefficient implies that higher prices reduce choice probability.
 
 
 ## 5. Estimation via Bayesian Methods
@@ -166,18 +237,161 @@ _hint: instead of calculating post=lik*prior, you can work in the log-space and 
 
 _hint: King Markov (in the video) use a candidate distribution of a coin flip to decide whether to move left or right among his islands.  Unlike King Markov, we have 4 dimensions (because we have 4 betas) and our dimensions are continuous.  So, use a multivariate normal distribution to pospose the next location for the algorithm to move to. I recommend a MNV(mu, Sigma) where mu=c(0,0,0,0) and sigma has diagonal values c(0.05, 0.05, 0.05, 0.005) and zeros on the off-diagonal.  Since this MVN has no covariances, you can sample each dimension independently (so 4 univariate normals instead of 1 multivariate normal), where the first 3 univariate normals are N(0,0.05) and the last one if N(0,0.005)._
 
+To estimate the posterior distribution of the MNL parameters, we implement a Metropolis-Hastings (M-H) algorithm. We use a random walk proposal distribution based on a multivariate normal with small variances. The posterior is proportional to the product of the likelihood and the prior; in log-space, this becomes a sum. 
 
-_todo: for at least one of the 4 parameters, show the trace plot of the algorithm, as well as the histogram of the posterior distribution._
+For priors, we assume:
+- \(\beta_{price} \sim \mathcal{N}(0, 1)\)
+- \(\beta_{binary} \sim \mathcal{N}(0, 5)\) for all binary variables
+
+```{python}
+# Log-posterior function = log-likelihood + log-prior
+def log_posterior(beta, X, y, group_ids):
+    ll = -neg_log_likelihood(beta, X, y, group_ids)  # from earlier section
+
+    # Prior: N(0,1) for price; N(0,5) for binary variables
+    log_prior = -0.5 * (beta[0] ** 2) / (1**2)  # price
+    log_prior += -0.5 * np.sum((beta[1:] ** 2) / (5**2))  # other variables
+
+    return ll + log_prior
+```
+
+Next, we implement the Metropolis-Hastings sampler. At each step, a new proposal is drawn from a multivariate normal distribution centered at the current value. If the new value increases the posterior, it is always accepted; otherwise, it is accepted with a probability proportional to the ratio of the new and current posterior values.
+
+We run the chain for 11,000 steps and discard the first 1,000 as burn-in, leaving 10,000 posterior samples.
+```{python}
+def metropolis_sampler(log_post_fn, X, y, group_ids, init, steps=11000, burn=1000, proposal_sd=0.05):
+    n_params = len(init)
+    draws = np.zeros((steps, n_params))
+    current = init.copy()
+    current_lp = log_post_fn(current, X, y, group_ids)
+
+    for s in range(steps):
+        proposal = current + np.random.normal(scale=proposal_sd, size=n_params)
+        proposal_lp = log_post_fn(proposal, X, y, group_ids)
+        acc_ratio = np.exp(proposal_lp - current_lp)
+
+        if np.random.rand() < acc_ratio:
+            current = proposal
+            current_lp = proposal_lp
+        draws[s] = current
+
+    return draws[burn:]  # discard burn-in
+```
+
+We now run the sampler, using a zero vector as the initial value and a small step size to control the proposal distribution. The resulting draws form an approximate sample from the true posterior distribution.
+```{python}
+init_beta = np.zeros(X.shape[1])
+samples = metropolis_sampler(log_posterior, X, y, group_ids, init_beta)
+
+import pandas as pd
+posterior_df = pd.DataFrame(samples, columns=['price', 'brand_P', 'brand_N', 'ad_Yes'])
+```
+
+_todo: for at least one of the 4 parameters, show the trace plot of the algorithm, as well as the histogram of the posterior distribution.
+
+To assess the behavior of the Metropolis-Hastings sampler, we visualize its output for the `price` coefficient. The trace plot shows the sequence of sampled values over iterations and helps diagnose convergence and mixing. The histogram displays the marginal posterior distribution and allows us to visually interpret central tendency and spread.
+
+```{python}
+import matplotlib.pyplot as plt
+
+def plot_trace_hist(samples, param_name):
+    fig, ax = plt.subplots(2, 1, figsize=(8, 6), constrained_layout=True)
+
+    # Trace plot
+    ax[0].plot(samples, color='steelblue', linewidth=0.8)
+    ax[0].set_title(f'Trace Plot for β_{param_name}')
+    ax[0].set_ylabel('Value')
+    ax[0].set_xlabel('Iteration')
+
+    # Histogram
+    ax[1].hist(samples, bins=30, color='salmon', edgecolor='black', alpha=0.8)
+    ax[1].set_title(f'Posterior Distribution for β_{param_name}')
+    ax[1].set_xlabel('Value')
+    ax[1].set_ylabel('Frequency')
+
+    plt.show()
+
+# Plot for price
+plot_trace_hist(posterior_df['price'], 'price')
+```
+From the trace plot, we observe that the sampler stabilizes after the burn-in period and mixes well throughout the chain. The histogram shows that the posterior distribution for \( \beta_{\text{price}} \) is centered around a negative value, consistent with our economic expectation that higher prices reduce choice probability.
+
+The `brand_P` coefficient represents the impact of Prime relative to the baseline (Hulu or Netflix). Its posterior distribution shows a moderate positive effect on choice probability.
+
+```{python}
+plot_trace_hist(posterior_df['brand_P'], 'brand_P')
+```
+
+The trace plot for \( \beta_{\text{brand\_P}} \) shows good mixing behavior and no apparent trends or drifts. The posterior distribution indicates a positive effect of Prime on the likelihood of choice, suggesting that Prime is preferred relative to the baseline brand. However, the distribution has more spread compared to price, indicating greater uncertainty.
+
+The `brand_N` coefficient reflects the effect of Netflix relative to the baseline. The posterior mass is concentrated at a higher positive value, suggesting strong preference.
+
+```{python}
+plot_trace_hist(posterior_df['brand_N'], 'brand_N')
+```
+
+For \( \beta_{\text{brand\_N}} \), the trace plot is well-centered and shows tight convergence. The histogram shows a strongly positive distribution with little spread, suggesting that Netflix is consistently preferred across respondents. The density’s concentration implies high certainty about this positive utility effect.
+
+The `ad_Yes` coefficient measures the effect of showing an ad compared to not showing one. The posterior is clearly left-skewed, suggesting that ads significantly reduce utility.
+
+```{python}
+plot_trace_hist(posterior_df['ad_Yes'], 'ad_Yes')
+```
+
+The trace for \( \beta_{\text{ad\_Yes}} \) is stable and shows good mixing. The histogram is clearly left-skewed and centered below zero, indicating that the presence of an ad significantly reduces utility and likelihood of selection. This effect is both substantial and precisely estimated, as reflected in the sharp posterior peak.
 
 _todo: report the 4 posterior means, standard deviations, and 95% credible intervals and compare them to your results from the Maximum Likelihood approach._
 
+We now summarize the Bayesian posterior draws by calculating the mean, standard deviation, and 95% credible interval for each parameter. These summaries provide a direct comparison to the MLE results from Section 4.
+
+The 95% credible interval is computed as the 2.5th and 97.5th percentiles of the posterior samples. This reflects the Bayesian interpretation of uncertainty: there is a 95% probability that the true parameter lies within this interval, given the data and prior.
+ ```{python}
+ # Posterior summaries
+posterior_summary = pd.DataFrame({
+    'Parameter': posterior_df.columns,
+    'Posterior Mean': posterior_df.mean().values,
+    'Posterior SD': posterior_df.std().values,
+    '2.5%': posterior_df.quantile(0.025).values,
+    '97.5%': posterior_df.quantile(0.975).values
+})
+
+posterior_summary
+```
+
+Comparing these results to the MLE estimates in Section 4, we generally expect:
+- Similar posterior means and MLE point estimates, particularly when the priors are weakly informative and the sample size is large.
+- Slightly wider credible intervals compared to MLE confidence intervals, as the Bayesian intervals incorporate prior uncertainty.
+
+These comparisons allow us to verify the robustness of inference under both estimation approaches.
 
 
 ## 6. Discussion
+If we did not know the data were simulated, we could still draw several substantive conclusions from the parameter estimates:
 
-_todo: Suppose you did not simulate the data. What do you observe about the parameter estimates? What does $\beta_\text{Netflix} > \beta_\text{Prime}$ mean? Does it make sense that $\beta_\text{price}$ is negative?_
+- The fact that \( \beta_{\text{Netflix}} > \beta_{\text{Prime}} \) suggests that, on average, respondents preferred Netflix over Prime. This interpretation is supported by the magnitude and significance of the estimated coefficients, both in the MLE and Bayesian frameworks. The larger value for Netflix indicates higher utility, all else equal.
 
-_todo: At a high level, discuss what change you would need to make in order to simulate data from --- and estimate the parameters of --- a multi-level (aka random-parameter or hierarchical) model. This is the model we use to analyze "real world" conjoint data._
+- The negative sign of \( \beta_{\text{price}} \) is both intuitive and expected: as the price of a streaming service increases, the likelihood of that service being chosen decreases. This reflects standard economic behavior, where higher costs tend to reduce demand.
+
+- The direction and relative sizes of the coefficients align well with plausible consumer preferences. Even without knowing the ground truth (as in simulation), these estimates would provide credible guidance on which features drive choice.
+
+Overall, the parameter estimates are interpretable, consistent with economic theory, and aligned with real-world consumer behavior. This supports the face validity of the model, even without knowing the simulation structure behind the data.
+
+While the parameter estimates we obtained are informative, they reflect average preferences across all respondents. In practice, however, individuals often differ in how they value features like price or brand. This motivates the use of multi-level (hierarchical) models, which account for preference heterogeneity across respondents.
+
+To simulate and estimate a multi-level (also called random-parameter or hierarchical) model, we would need to introduce respondent-level heterogeneity into the data-generating process. In contrast to our current model, which assumes fixed preferences across all respondents, a hierarchical model allows each individual to have their own set of part-worth utilities.
+
+**Changes needed for simulation:**
+- Instead of assigning a single \(\beta\) vector for all individuals, we would draw a unique \(\beta_i\) for each respondent \(i\).
+- These respondent-specific \(\beta_i\)s would be drawn from a population-level distribution, typically multivariate normal:  
+  \[ \beta_i \sim \mathcal{N}(\mu, \Sigma) \]
+- We would then simulate each respondent’s choices using their own \(\beta_i\).
+
+**Changes needed for estimation:**
+- We could no longer use standard MLE. Instead, we would use Bayesian hierarchical modeling or simulated maximum likelihood (e.g., using techniques like Hierarchical Bayes, Gibbs sampling, or variational inference).
+- The estimation process would recover both the population-level parameters (\(\mu\), \(\Sigma\)) and the individual-level \(\beta_i\)s.
+
+This approach is critical when analyzing real-world data, where individuals naturally vary in how they value price, brand, and other features. Multi-level models enable us to capture this variation and make more personalized predictions or segmentations.
+
 
 
 
