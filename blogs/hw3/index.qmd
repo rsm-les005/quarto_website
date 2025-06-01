@@ -9,7 +9,6 @@ This assignment expores two methods for estimating the MNL model: (1) via Maximu
 
 
 ## 1. Likelihood for the Multi-nomial Logit (MNL) Model
-
 Suppose we have $i=1,\ldots,n$ consumers who each select exactly one product $j$ from a set of $J$ products. The outcome variable is the identity of the product chosen $y_i \in \{1, \ldots, J\}$ or equivalently a vector of $J-1$ zeros and $1$ one, where the $1$ indicates the selected product. For example, if the third product was chosen out of 3 products, then either $y=3$ or $y=(0,0,1)$ depending on how we want to represent it. Suppose also that we have a vector of data on each product $x_j$ (eg, brand, price, etc.). 
 
 We model the consumer's decision as the selection of the product that provides the most utility, and we'll specify the utility function as a linear function of the product characteristics:
@@ -45,7 +44,6 @@ $$ \ell_n(\beta) = \sum_{i=1}^n \sum_{j=1}^J \delta_{ij} \log(\mathbb{P}_i(j)) $
 
 
 ## 2. Simulate Conjoint Data
-
 We will simulate data from a conjoint experiment about video content streaming services. We elect to simulate 100 respondents, each completing 10 choice tasks, where they choose from three alternatives per task. For simplicity, there is not a "no choice" option; each simulated respondent must select one of the 3 alternatives. 
 
 Each alternative is a hypothetical streaming offer consistent of three attributes: (1) brand is either Netflix, Amazon Prime, or Hulu; (2) ads can either be part of the experience, or it can be ad-free, and (3) price per month ranges from \$4 to \$32 in increments of \$4.
@@ -125,7 +123,6 @@ conjoint_data = conjoint_data[['resp', 'task', 'brand', 'ad', 'price', 'choice']
 
 
 ## 3. Preparing the Data for Estimation
-
 The "hard part" of the MNL likelihood function is organizing the data, as we need to keep track of 3 dimensions (consumer $i$, covariate $k$, and product $j$) instead of the typical 2 dimensions for cross-sectional regression models (consumer $i$ and covariate $k$). The fact that each task for each respondent has the same number of alternatives (3) helps.  In addition, we need to convert the categorical variables for brand and ads into binary variables.
 
 ```{python}
@@ -153,7 +150,6 @@ group_ids = pd.factorize(group_labels)[0]
 
 
 ## 4. Estimation via Maximum Likelihood
-
 To estimate the parameters of the Multinomial Logit (MNL) model via maximum likelihood, we first need to specify the log-likelihood function. The MNL model assumes that the probability of a respondent choosing a particular alternative is a function of the observed attributes of that alternative and the model coefficients. The log-likelihood sums the log of these probabilities across all observed choices.
 
 Below, we define a Python function that computes the negative log-likelihood, which will later be minimized using numerical optimization techniques.
@@ -228,15 +224,6 @@ This output shows the estimated effect of each product attribute on utility. Pos
 
 
 ## 5. Estimation via Bayesian Methods
-
-_todo: code up a metropolis-hasting MCMC sampler of the posterior distribution. Take 11,000 steps and throw away the first 1,000, retaining the subsequent 10,000._
-
-_hint: Use N(0,5) priors for the betas on the binary variables, and a N(0,1) prior for the price beta._
-
-_hint: instead of calculating post=lik*prior, you can work in the log-space and calculate log-post = log-lik + log-prior (this should enable you to re-use your log-likelihood function from the MLE section just above)_
-
-_hint: King Markov (in the video) use a candidate distribution of a coin flip to decide whether to move left or right among his islands.  Unlike King Markov, we have 4 dimensions (because we have 4 betas) and our dimensions are continuous.  So, use a multivariate normal distribution to pospose the next location for the algorithm to move to. I recommend a MNV(mu, Sigma) where mu=c(0,0,0,0) and sigma has diagonal values c(0.05, 0.05, 0.05, 0.005) and zeros on the off-diagonal.  Since this MVN has no covariances, you can sample each dimension independently (so 4 univariate normals instead of 1 multivariate normal), where the first 3 univariate normals are N(0,0.05) and the last one if N(0,0.005)._
-
 To estimate the posterior distribution of the MNL parameters, we implement a Metropolis-Hastings (M-H) algorithm. We use a random walk proposal distribution based on a multivariate normal with small variances. The posterior is proportional to the product of the likelihood and the prior; in log-space, this becomes a sum. 
 
 For priors, we assume:
@@ -287,8 +274,6 @@ import pandas as pd
 posterior_df = pd.DataFrame(samples, columns=['price', 'brand_P', 'brand_N', 'ad_Yes'])
 ```
 
-_todo: for at least one of the 4 parameters, show the trace plot of the algorithm, as well as the histogram of the posterior distribution.
-
 To assess the behavior of the Metropolis-Hastings sampler, we visualize its output for the `price` coefficient. The trace plot shows the sequence of sampled values over iterations and helps diagnose convergence and mixing. The histogram displays the marginal posterior distribution and allows us to visually interpret central tendency and spread.
 
 ```{python}
@@ -313,25 +298,34 @@ def plot_trace_hist(samples, param_name):
 
 # Plot for price
 plot_trace_hist(posterior_df['price'], 'price')
-plot_trace_hist(posterior_df['brand_P'], 'brand_P')
-plot_trace_hist(posterior_df['brand_P'], 'brand_P')
-plot_trace_hist(posterior_df['ad_Yes'], 'ad_Yes')
 ```
 
 From the price trace plot, we observe that the sampler stabilizes after the burn-in period and mixes well throughout the chain. The histogram shows that the posterior distribution for \( \beta_{\text{price}} \) is centered around a negative value, consistent with our economic expectation that higher prices reduce choice probability.
 
+```{python}
+plot_trace_hist(posterior_df['brand_P'], 'brand_P')
+```
+
 The trace plot for \( \beta_{\text{brand\_P}} \) shows good mixing behavior and no apparent trends or drifts. The posterior distribution indicates a positive effect of Prime on the likelihood of choice, suggesting that Prime is preferred relative to the baseline brand. However, the distribution has more spread compared to price, indicating greater uncertainty.
+
+```{python}
+plot_trace_hist(posterior_df['brand_P'], 'brand_N')
+```
 
 For \( \beta_{\text{brand\_N}} \), the trace plot is well-centered and shows tight convergence. The histogram shows a strongly positive distribution with little spread, suggesting that Netflix is consistently preferred across respondents. The density’s concentration implies high certainty about this positive utility effect.
 
+```{python}
+plot_trace_hist(posterior_df['ad_Yes'], 'ad_Yes')
+```
+
 The trace for \( \beta_{\text{ad\_Yes}} \) is stable and shows good mixing. The histogram is clearly left-skewed and centered below zero, indicating that the presence of an ad significantly reduces utility and likelihood of selection. This effect is both substantial and precisely estimated, as reflected in the sharp posterior peak.
 
-_todo: report the 4 posterior means, standard deviations, and 95% credible intervals and compare them to your results from the Maximum Likelihood approach._
 
 We now summarize the Bayesian posterior draws by calculating the mean, standard deviation, and 95% credible interval for each parameter. These summaries provide a direct comparison to the MLE results from Section 4.
 
 The 95% credible interval is computed as the 2.5th and 97.5th percentiles of the posterior samples. This reflects the Bayesian interpretation of uncertainty: there is a 95% probability that the true parameter lies within this interval, given the data and prior.
- ```{python}
+
+```{python}
 # Posterior summaries
 posterior_summary = pd.DataFrame({
     'Parameter': posterior_df.columns,
