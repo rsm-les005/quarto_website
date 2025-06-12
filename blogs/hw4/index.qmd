@@ -1,13 +1,9 @@
 ---
-title: "Machine Learning"
+title: "Machine Learning Models"
 author: "Lebin Sun"
 date: June 11, 2025
 ---
-
-_todo: do two analyses.  Do one of either 1a or 1b, AND one of either 2a or 2b._
-
-
-## 1a. K-Means
+## 1. K-Means
 ### Load and Prepare the Data
 
 We start by loading the Palmer Penguins dataset and selecting only the two numeric features we'll use for clustering: **bill length** and **flipper length**. We also scale the data to have zero mean and unit variance.
@@ -144,23 +140,14 @@ plt.show()
 
 The Elbow Method plot displays the Within-Cluster Sum of Squares (WCSS) for different values of k ranging from 2 to 7. WCSS measures the compactness of the clusters, with lower values indicating tighter, more cohesive clusters. As the number of clusters increases, WCSS naturally decreases. However, the key insight comes from identifying the "elbow" point—where the rate of decrease sharply levels off. In this plot, the most noticeable elbow appears at k=3, suggesting that increasing the number of clusters beyond 3 results in only marginal improvements in cluster compactness. Therefore, k=3 is likely the optimal number of clusters, balancing simplicity with good fit.
 
-## 1b. Latent-Class MNL
-
-_todo: Use the Yogurt dataset to estimate a latent-class MNL model. This model was formally introduced in the paper by Kamakura & Russell (1989); you may want to read or reference page 2 of the pdf, which is described in the class slides, session 4, slides 56-57._
-
-_The data provides anonymized consumer identifiers (`id`), a vector indicating the chosen product (`y1`:`y4`), a vector indicating if any products were "featured" in the store as a form of advertising (`f1`:`f4`), and the products' prices in price-per-ounce (`p1`:`p4`). For example, consumer 1 purchased yogurt 4 at a price of 0.079/oz and none of the yogurts were featured/advertised at the time of consumer 1's purchase.  Consumers 2 through 7 each bought yogurt 2, etc. You may want to reshape the data from its current "wide" format into a "long" format._
-
-_todo: Fit the standard MNL model on these data.  Then fit the latent-class MNL on these data separately for 2, 3, 4, and 5 latent classes._
-
-_todo: How many classes are suggested by the $BIC = -2*\ell_n  + k*log(n)$? (where $\ell_n$ is the log-likelihood, $n$ is the sample size, and $k$ is the number of parameters.) The Bayesian-Schwarz Information Criterion [link](https://en.wikipedia.org/wiki/Bayesian_information_criterion) is a metric that assess the benefit of a better log likelihood at the expense of additional parameters to estimate -- akin to the adjusted R-squared for the linear regression model. Note, that a **lower** BIC indicates a better model fit, accounting for the number of parameters in the model._
-
-_todo: compare the parameter estimates between (1) the aggregate MNL, and (2) the latent-class MNL with the number of classes suggested by the BIC._
 
 
+## 2. K Nearest Neighbors
+In this section, we will explore the K-Nearest Neighbors (KNN) algorithm using a synthetic dataset. The outcome variable `y` is determined by whether `x2` is above or below a wiggly boundary defined by a sine function.
 
-## 2a. K Nearest Neighbors
+### Generate training data
 
-_todo: use the following code (or the python equivalent) to generate a synthetic dataset for the k-nearest neighbors algorithm.  The code generates a dataset with two features, `x1` and `x2`, and a binary outcome variable `y` that is determined by whether `x2` is above or below a wiggly boundary defined by a sin function._
+We first generate a synthetic dataset of 100 observations. The horizontal axis is `x1`, the vertical axis is `x2`, and the color indicates the binary outcome `y`. We also draw the underlying wiggly boundary.
 
 ```{python}
 import numpy as np
@@ -180,22 +167,88 @@ dat = pd.DataFrame({'x1': x1, 'x2': x2, 'y': y})
 
 ```
 
-_todo: plot the data where the horizontal axis is `x1`, the vertical axis is `x2`, and the points are colored by the value of `y`.  You may optionally draw the wiggly boundary._
+### Plot the data
 
-_todo: generate a test dataset with 100 points, using the same code as above but with a different seed._
+We now visualize the training data. Each point is colored by its class label (`y`). The dashed line shows the underlying wiggly boundary used to generate the labels.
 
-_todo: implement KNN by hand.  Check you work with a built-in function -- eg, `class::knn()` or `caret::train(method="knn")` in R, or scikit-learn's `KNeighborsClassifier` in Python._
+```{python}
+import matplotlib.pyplot as plt
 
-_todo: run your function for k=1,...,k=30, each time noting the percentage of correctly-classified points from the test dataset. Plot the results, where the horizontal axis is 1-30 and the vertical axis is the percentage of correctly-classified points. What is the optimal value of k as suggested by your plot?_ 
+plt.figure(figsize=(7, 6))
+plt.scatter(dat['x1'], dat['x2'], c=dat['y'].astype(int), cmap='bwr', edgecolor='k', alpha=0.7, label='Points')
+plt.plot(np.sort(x1), np.sin(4 * np.sort(x1)) + np.sort(x1), color='black', linestyle='--', label='Boundary')
+plt.xlabel("x1")
+plt.ylabel("x2")
+plt.title("Synthetic Training Data with Wiggly Boundary")
+plt.legend()
+plt.grid(True)
+plt.show()
+```
 
+### Generate a test dataset
 
+We generate a new dataset with the same structure, using a **different random seed**. This will serve as our test set for evaluating model performance.
 
-## 2b. Key Drivers Analysis
+```{python}
+# Generate test data (different seed)
+np.random.seed(99)
+x1_test = np.random.uniform(-3, 3, n)
+x2_test = np.random.uniform(-3, 3, n)
+boundary_test = np.sin(4 * x1_test) + x1_test
+y_test = np.where(x2_test > boundary_test, 1, 0).astype(str)
 
-_todo: replicate the table on slide 75 of the session 5 slides. Specifically, using the dataset provided in the file data_for_drivers_analysis.csv, calculate: pearson correlations, standardized regression coefficients, "usefulness", Shapley values for a linear regression, Johnson's relative weights, and the mean decrease in the gini coefficient from a random forest. You may use packages built into R or Python; you do not need to perform these calculations "by hand."_
+test = pd.DataFrame({'x1': x1_test, 'x2': x2_test, 'y': y_test})
+```
 
-_If you want a challenge, add additional measures to the table such as the importance scores from XGBoost, from a Neural Network, or from any additional method that measures the importance of variables._
+### Implement KNN by hand
 
+Now we implement the KNN classifier manually. Later, we can compare it with `KNeighborsClassifier` from `scikit-learn` to validate the results.
+
+```{python}
+from collections import Counter
+
+def knn_predict(X_train, y_train, X_test, k):
+    preds = []
+    for xt in X_test:
+        distances = np.linalg.norm(X_train - xt, axis=1)
+        nearest_indices = np.argsort(distances)[:k]
+        nearest_labels = y_train[nearest_indices]
+        pred = Counter(nearest_labels).most_common(1)[0][0]
+        preds.append(pred)
+    return np.array(preds)
+```
+
+### Run KNN for k = 1,...,30
+
+We now evaluate the prediction accuracy of our KNN classifier on the test set for values of \( k = 1 \) to \( 30 \). The x-axis is \( k \), and the y-axis is the classification accuracy.
+
+```{python}
+# Prepare data for loop
+X_train = dat[['x1', 'x2']].values
+y_train = dat['y'].values
+X_test = test[['x1', 'x2']].values
+y_test = test['y'].values
+
+# Evaluate accuracy for k = 1 to 30
+k_values = range(1, 31)
+accuracy = []
+
+for k in k_values:
+    preds = knn_predict(X_train, y_train, X_test, k)
+    acc = np.mean(preds == y_test)
+    accuracy.append(acc)
+
+# Plot results
+plt.figure(figsize=(8, 5))
+plt.plot(k_values, accuracy, marker='o')
+plt.xlabel("k (Number of Neighbors)")
+plt.ylabel("Accuracy on Test Set")
+plt.title("KNN Accuracy vs. k")
+plt.grid(True)
+plt.show()
+```
+
+The plot above shows how the classification accuracy of the K-Nearest Neighbors (KNN) model on the test set changes as the number of neighbors k varies from 1 to 30. Overall, we observe that smaller values of k, especially between 1 and 5, tend to yield higher accuracy, with several points reaching or exceeding 92%. As k increases beyond 10, the model's accuracy generally declines, fluctuating around 87%–90%, with a few dips as low as 86%. This trend suggests that the model performs best when it is more flexible and responsive to local patterns (i.e., low k), while larger k values overly smooth the decision boundary and underfit the data. Therefore, the optimal k for this task appears to be around 1 to 5, where accuracy is consistently highest.
 
 
 
