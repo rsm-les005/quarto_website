@@ -8,14 +8,141 @@ _todo: do two analyses.  Do one of either 1a or 1b, AND one of either 2a or 2b._
 
 
 ## 1a. K-Means
+### Load and Prepare the Data
 
-_todo: write your own code to implement the k-means algorithm.  Make plots of the various steps the algorithm takes so you can "see" the algorithm working.  Test your algorithm on the Palmer Penguins dataset, specifically using the bill length and flipper length variables.  Compare your results to the built-in `kmeans` function in R or Python._
+We start by loading the Palmer Penguins dataset and selecting only the two numeric features we'll use for clustering: **bill length** and **flipper length**. We also scale the data to have zero mean and unit variance.
 
-_todo: Calculate both the within-cluster-sum-of-squares and silhouette scores (you can use built-in functions to do so) and plot the results for various numbers of clusters (ie, K=2,3,...,7). What is the "right" number of clusters as suggested by these two metrics?_
+```{python}
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler
 
-_If you want a challenge, add your plots as an animated gif on your website so that the result looks something like [this](https://www.youtube.com/shorts/XCsoWZU9oN8)._
+# Load data and select features
+df = pd.read_csv("palmer_penguins.csv")
+df = df[['bill_length_mm', 'flipper_length_mm']].dropna()
 
+# Standardize the features
+scaler = StandardScaler()
+X = scaler.fit_transform(df)
+```
 
+### Define Helper Functions
+
+To build our own K-Means algorithm, we need a function to compute Euclidean distances between points and cluster centroids.
+
+```{python}
+# Helper: Euclidean distance between array of points and a centroid
+def euclidean(a, b):
+    return np.linalg.norm(a - b, axis=1)
+```
+
+### Implement K-Means from Scratch
+
+Here's the main loop of the K-Means algorithm:
+1. Randomly initialize `k` centroids.
+2. Assign each point to the nearest centroid.
+3. Recompute the centroids.
+4. Repeat until convergence.
+
+We also keep track of centroid history for visualization.
+
+```{python}
+def kmeans_custom(X, k=3, max_iters=10, seed=42):
+    np.random.seed(seed)
+    centroids = X[np.random.choice(len(X), size=k, replace=False)]
+    history = [centroids.copy()]
+
+    for _ in range(max_iters):
+        distances = np.array([euclidean(X, c) for c in centroids])
+        labels = np.argmin(distances, axis=0)
+        new_centroids = np.array([X[labels == i].mean(axis=0) for i in range(k)])
+        
+        history.append(new_centroids.copy())
+        if np.allclose(new_centroids, centroids):
+            break
+        centroids = new_centroids
+    
+    return labels, centroids, history
+```
+
+### Run the Algorithm
+
+Let’s run the custom K-Means on the penguins dataset with `k=3` and visualize the result.
+
+```{python}
+labels, final_centroids, history = kmeans_custom(X, k=3)
+```
+
+### Visualize Final Clustering
+
+We plot the data points colored by cluster assignment, along with the final centroids.
+
+```{python}
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8, 6))
+plt.scatter(X[:, 0], X[:, 1], c=labels, cmap='viridis', alpha=0.7)
+plt.scatter(final_centroids[:, 0], final_centroids[:, 1], color='red', marker='X', s=200)
+plt.xlabel("Bill Length (scaled)")
+plt.ylabel("Flipper Length (scaled)")
+plt.title("Custom K-Means Clustering (k=3)")
+plt.grid(True)
+plt.show()
+```
+
+The plot illustrates the result of applying a custom K-Means clustering algorithm with k=3 to the Palmer Penguins dataset, using bill length and flipper length as input features. Each point represents a penguin, colored by its assigned cluster, and the large red Xs indicate the final centroid of each cluster. The clustering reveals three distinct groups: one consisting of penguins with relatively shorter bills and flippers (left cluster), another with longer bills but shorter flippers (bottom-right), and a third with both longer bills and flippers (top-right). The clear separation and compactness of the clusters suggest that bill and flipper length are useful features for grouping the penguins, potentially reflecting differences in species or ecological niches. Since the features were standardized, the interpretation focuses on relative size rather than raw measurements.
+
+### Evaluate the Optimal Number of Clusters
+
+To assess the best value for \( k \), we compute two metrics:
+
+- **Within-Cluster Sum of Squares (WCSS)**: Measures compactness; lower is better.
+- **Silhouette Score**: Measures how well-separated the clusters are; ranges from -1 to 1, and higher is better.
+
+We compute both for \( k = 2 \) to \( 7 \) using the built-in `KMeans` implementation from `sklearn`.
+
+```{python}
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+wcss = []
+silhouette_scores = []
+k_values = range(2, 8)
+
+for k in k_values:
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+    labels = kmeans.fit_predict(X)
+    
+    wcss.append(kmeans.inertia_)
+    silhouette_scores.append(silhouette_score(X, labels))
+```
+
+### Plot the Metrics
+
+We now visualize the WCSS and silhouette scores to identify the "best" number of clusters.
+
+```{python}
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(1, 2, figsize=(14, 5))
+
+# WCSS (Elbow method)
+ax[0].plot(k_values, wcss, marker='o')
+ax[0].set_title('Elbow Method (WCSS)')
+ax[0].set_xlabel('Number of clusters (k)')
+ax[0].set_ylabel('WCSS')
+
+# Silhouette Scores
+ax[1].plot(k_values, silhouette_scores, marker='o', color='green')
+ax[1].set_title('Silhouette Score')
+ax[1].set_xlabel('Number of clusters (k)')
+ax[1].set_ylabel('Score')
+
+plt.tight_layout()
+plt.show()
+```
+
+The Elbow Method plot displays the Within-Cluster Sum of Squares (WCSS) for different values of k ranging from 2 to 7. WCSS measures the compactness of the clusters, with lower values indicating tighter, more cohesive clusters. As the number of clusters increases, WCSS naturally decreases. However, the key insight comes from identifying the "elbow" point—where the rate of decrease sharply levels off. In this plot, the most noticeable elbow appears at k=3, suggesting that increasing the number of clusters beyond 3 results in only marginal improvements in cluster compactness. Therefore, k=3 is likely the optimal number of clusters, balancing simplicity with good fit.
 
 ## 1b. Latent-Class MNL
 
