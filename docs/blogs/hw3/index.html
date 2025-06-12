@@ -263,7 +263,7 @@ u_{ij} = (1 \times Netflix_j) + (0.5 \times Prime_j) + (-0.8*Ads_j) - 0.1\times 
 \]</span></p>
 <p>where the variables are binary indicators and <span class="math inline">\(\varepsilon\)</span> is Type 1 Extreme Value (ie, Gumble) distributed.</p>
 <p>The following code provides the simulation of the conjoint data.</p>
-<div id="de779156" class="cell" data-execution_count="1">
+<div id="259b126f" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -331,7 +331,7 @@ u_{ij} = (1 \times Netflix_j) + (0.5 \times Prime_j) + (-0.8*Ads_j) - 0.1\times 
 <section id="preparing-the-data-for-estimation" class="level2">
 <h2 class="anchored" data-anchor-id="preparing-the-data-for-estimation">3. Preparing the Data for Estimation</h2>
 <p>The “hard part” of the MNL likelihood function is organizing the data, as we need to keep track of 3 dimensions (consumer <span class="math inline">\(i\)</span>, covariate <span class="math inline">\(k\)</span>, and product <span class="math inline">\(j\)</span>) instead of the typical 2 dimensions for cross-sectional regression models (consumer <span class="math inline">\(i\)</span> and covariate <span class="math inline">\(k\)</span>). The fact that each task for each respondent has the same number of alternatives (3) helps. In addition, we need to convert the categorical variables for brand and ads into binary variables.</p>
-<div id="93b67b89" class="cell" data-execution_count="2">
+<div id="fe97c9a2" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -361,7 +361,7 @@ u_{ij} = (1 \times Netflix_j) + (0.5 \times Prime_j) + (-0.8*Ads_j) - 0.1\times 
 <h2 class="anchored" data-anchor-id="estimation-via-maximum-likelihood">4. Estimation via Maximum Likelihood</h2>
 <p>To estimate the parameters of the Multinomial Logit (MNL) model via maximum likelihood, we first need to specify the log-likelihood function. The MNL model assumes that the probability of a respondent choosing a particular alternative is a function of the observed attributes of that alternative and the model coefficients. The log-likelihood sums the log of these probabilities across all observed choices.</p>
 <p>Below, we define a Python function that computes the negative log-likelihood, which will later be minimized using numerical optimization techniques.</p>
-<div id="2c9aefff" class="cell" data-execution_count="3">
+<div id="97bf5ded" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.special <span class="im">import</span> logsumexp</span>
@@ -393,7 +393,7 @@ u_{ij} = (1 \times Netflix_j) + (0.5 \times Prime_j) + (-0.8*Ads_j) - 0.1\times 
 </div>
 <p>This function computes the probability of the chosen alternative within each choice task and returns the (negative) sum of their log-probabilities.</p>
 <p>With the log-likelihood function defined, we now use the <code>scipy.optimize.minimize()</code> function to find the Maximum Likelihood Estimates (MLEs) of the model parameters. The optimization routine minimizes the negative log-likelihood, and the inverse of the Hessian matrix gives us the variance-covariance matrix for the parameter estimates. From this, we compute standard errors and construct 95% confidence intervals for each coefficient.</p>
-<div id="433dcdcb" class="cell" data-execution_count="4">
+<div id="c7baabf0" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> minimize</span>
@@ -488,7 +488,7 @@ u_{ij} = (1 \times Netflix_j) + (0.5 \times Prime_j) + (-0.8*Ads_j) - 0.1\times 
 <h2 class="anchored" data-anchor-id="estimation-via-bayesian-methods">5. Estimation via Bayesian Methods</h2>
 <p>To estimate the posterior distribution of the MNL parameters, we implement a Metropolis-Hastings (M-H) algorithm. We use a random walk proposal distribution based on a multivariate normal with small variances. The posterior is proportional to the product of the likelihood and the prior; in log-space, this becomes a sum.</p>
 <p>For priors, we assume: - (<em>{price} (0, 1)) - (</em>{binary} (0, 5)) for all binary variables</p>
-<div id="39a3d612" class="cell" data-execution_count="5">
+<div id="5ea62d4a" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Log-posterior function = log-likelihood + log-prior</span></span>
@@ -504,7 +504,7 @@ u_{ij} = (1 \times Netflix_j) + (0.5 \times Prime_j) + (-0.8*Ads_j) - 0.1\times 
 </div>
 <p>Next, we implement the Metropolis-Hastings sampler. At each step, a new proposal is drawn from a multivariate normal distribution centered at the current value. If the new value increases the posterior, it is always accepted; otherwise, it is accepted with a probability proportional to the ratio of the new and current posterior values.</p>
 <p>We run the chain for 11,000 steps and discard the first 1,000 as burn-in, leaving 10,000 posterior samples.</p>
-<div id="a68e24c0" class="cell" data-execution_count="6">
+<div id="4c631e3a" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> metropolis_sampler(log_post_fn, X, y, group_ids, init, steps<span class="op">=</span><span class="dv">11000</span>, burn<span class="op">=</span><span class="dv">1000</span>, proposal_sd<span class="op">=</span><span class="fl">0.05</span>):</span>
@@ -527,7 +527,7 @@ u_{ij} = (1 \times Netflix_j) + (0.5 \times Prime_j) + (-0.8*Ads_j) - 0.1\times 
 </details>
 </div>
 <p>We now run the sampler, using a zero vector as the initial value and a small step size to control the proposal distribution. The resulting draws form an approximate sample from the true posterior distribution.</p>
-<div id="47f9bfa9" class="cell" data-execution_count="7">
+<div id="03f35739" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>init_beta <span class="op">=</span> np.zeros(X.shape[<span class="dv">1</span>])</span>
@@ -538,7 +538,7 @@ u_{ij} = (1 \times Netflix_j) + (0.5 \times Prime_j) + (-0.8*Ads_j) - 0.1\times 
 </details>
 </div>
 <p>To assess the behavior of the Metropolis-Hastings sampler, we visualize its output for the <code>price</code> coefficient. The trace plot shows the sequence of sampled values over iterations and helps diagnose convergence and mixing. The histogram displays the marginal posterior distribution and allows us to visually interpret central tendency and spread.</p>
-<div id="57b403e6" class="cell" data-execution_count="8">
+<div id="fa2729a6" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -572,7 +572,7 @@ u_{ij} = (1 \times Netflix_j) + (0.5 \times Prime_j) + (-0.8*Ads_j) - 0.1\times 
 </div>
 </div>
 <p>From the price trace plot, we observe that the sampler stabilizes after the burn-in period and mixes well throughout the chain. The histogram shows that the posterior distribution for ( _{} ) is centered around a negative value, consistent with our economic expectation that higher prices reduce choice probability.</p>
-<div id="47b1f248" class="cell" data-execution_count="9">
+<div id="46f78ac8" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>plot_trace_hist(posterior_df[<span class="st">'brand_P'</span>], <span class="st">'brand_P'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -586,7 +586,7 @@ u_{ij} = (1 \times Netflix_j) + (0.5 \times Prime_j) + (-0.8*Ads_j) - 0.1\times 
 </div>
 </div>
 <p>The trace plot for ( _{} ) shows good mixing behavior and no apparent trends or drifts. The posterior distribution indicates a positive effect of Prime on the likelihood of choice, suggesting that Prime is preferred relative to the baseline brand. However, the distribution has more spread compared to price, indicating greater uncertainty.</p>
-<div id="397f09d3" class="cell" data-execution_count="10">
+<div id="752a9d16" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>plot_trace_hist(posterior_df[<span class="st">'brand_P'</span>], <span class="st">'brand_N'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -600,7 +600,7 @@ u_{ij} = (1 \times Netflix_j) + (0.5 \times Prime_j) + (-0.8*Ads_j) - 0.1\times 
 </div>
 </div>
 <p>For ( _{} ), the trace plot is well-centered and shows tight convergence. The histogram shows a strongly positive distribution with little spread, suggesting that Netflix is consistently preferred across respondents. The density’s concentration implies high certainty about this positive utility effect.</p>
-<div id="730a0956" class="cell" data-execution_count="11">
+<div id="b77639bb" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>plot_trace_hist(posterior_df[<span class="st">'ad_Yes'</span>], <span class="st">'ad_Yes'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -616,7 +616,7 @@ u_{ij} = (1 \times Netflix_j) + (0.5 \times Prime_j) + (-0.8*Ads_j) - 0.1\times 
 <p>The trace for ( _{} ) is stable and shows good mixing. The histogram is clearly left-skewed and centered below zero, indicating that the presence of an ad significantly reduces utility and likelihood of selection. This effect is both substantial and precisely estimated, as reflected in the sharp posterior peak.</p>
 <p>We now summarize the Bayesian posterior draws by calculating the mean, standard deviation, and 95% credible interval for each parameter. These summaries provide a direct comparison to the MLE results from Section 4.</p>
 <p>The 95% credible interval is computed as the 2.5th and 97.5th percentiles of the posterior samples. This reflects the Bayesian interpretation of uncertainty: there is a 95% probability that the true parameter lies within this interval, given the data and prior.</p>
-<div id="9c64eb06" class="cell" data-execution_count="12">
+<div id="579842ca" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior summaries</span></span>
